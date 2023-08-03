@@ -1,0 +1,48 @@
+{
+  "name": "@cityssm/green-button-subscriber",
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": "^14.13.1 || >=16.0.0"
+  },
+  "description": "Handles the OAuth authentication, downloading, and parsing of Green Button API data.",
+  "keywords": [
+    "energy",
+    "energy-consumption",
+    "energy-usage",
+    "espi",
+    "green-button",
+    "utilityapi",
+    "xml-parser"
+  ],
+  "exports": {
+    ".": "./index.js"
+  },
+  "scripts": {
+    "test": "cross-env NODE_ENV=dev DEBUG=green-button-*  mocha --timeout 60000",
+    "coverage": "cross-env NODE_ENV=dev DEBUG=green-button-* c8 --reporter=lcov --reporter=text --reporter=text-summary mocha --timeout 60000 --exit"
+  },
+  "author": "The Corporation of the City of Sault Ste. Marie",
+  "license": "MIT",
+  "homepage": "https://github.com/cityssm/node-green-button-subscriber#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cityssm/node-green-button-subscriber.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cityssm/node-green-button-subscriber/issues"
+  },
+  "dependencies": {
+    "@cityssm/green-button-parser": "^0.5.1",
+    "axios": "^1.4.0",
+    "debug": "^4.3.4"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.8",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^20.4.6",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.46.0",
+    "eslint-config-cityssm": "^0.4.0"
+  }
+}
