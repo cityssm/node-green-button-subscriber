@@ -1,9 +1,10 @@
 // eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable @typescript-eslint/indent */
 
-import { atomToGreenButtonJson } from '@cityssm/green-button-parser'
-// eslint-disable-next-line n/no-missing-import
-import type { GreenButtonJson } from '@cityssm/green-button-parser/types/entryTypes.js'
+import {
+  atomToGreenButtonJson,
+  type types as greenButtonTypes
+} from '@cityssm/green-button-parser'
 import axios from 'axios'
 import Debug from 'debug'
 
@@ -105,7 +106,7 @@ export async function getEndpoint(
 
 export async function getGreenButtonEndpoint(
   greenButtonEndpoint: `/${string}`
-): Promise<GreenButtonJson | undefined> {
+): Promise<greenButtonTypes.GreenButtonJson | undefined> {
   const greenButtonXml = await getEndpoint(
     'DataCustodian/espi/1_1/resource' + greenButtonEndpoint
   )
@@ -118,14 +119,14 @@ export async function getGreenButtonEndpoint(
 }
 
 export async function getAuthorizations(): Promise<
-  GreenButtonJson | undefined
+  greenButtonTypes.GreenButtonJson | undefined
 > {
   return await getGreenButtonEndpoint('/Authorization')
 }
 
 export async function getCustomers(
   authorizationId: string
-): Promise<GreenButtonJson | undefined> {
+): Promise<greenButtonTypes.GreenButtonJson | undefined> {
   return await getGreenButtonEndpoint(
     `/RetailCustomer/${authorizationId}/Customer`
   )
@@ -134,7 +135,7 @@ export async function getCustomers(
 export async function getCustomerAccounts(
   authorizationId: string,
   customerId: string
-): Promise<GreenButtonJson | undefined> {
+): Promise<greenButtonTypes.GreenButtonJson | undefined> {
   return await getGreenButtonEndpoint(
     `/RetailCustomer/${authorizationId}/Customer/${customerId}/CustomerAccount`
   )
@@ -144,7 +145,7 @@ export async function getCustomerAgreements(
   authorizationId: string,
   customerId: string,
   customerAccountId: string
-): Promise<GreenButtonJson | undefined> {
+): Promise<greenButtonTypes.GreenButtonJson | undefined> {
   return await getGreenButtonEndpoint(
     `/RetailCustomer/${authorizationId}/Customer/${customerId}/CustomerAccount/${customerAccountId}/CustomerAgreement`
   )
@@ -157,6 +158,6 @@ export async function getCustomerAgreements(
  */
 export async function getBatchSubscriptions(
   authorizationId: string
-): Promise<GreenButtonJson | undefined> {
+): Promise<greenButtonTypes.GreenButtonJson | undefined> {
   return await getGreenButtonEndpoint(`/Batch/Subscription/${authorizationId}`)
 }

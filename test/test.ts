@@ -1,6 +1,7 @@
 import assert from 'node:assert'
+import fs from 'node:fs/promises'
 
-import * as greenButtonParser from '@cityssm/green-button-parser'
+import { helpers as greenButtonHelpers } from '@cityssm/green-button-parser'
 
 import * as greenButtonSubscriber from '../index.js'
 
@@ -22,7 +23,7 @@ describe('node-green-button-subscriber', () => {
 
       assert.ok(response !== undefined)
 
-      const entries = greenButtonParser.helpers.getEntriesByContentType(
+      const entries = greenButtonHelpers.getEntriesByContentType(
         response,
         'Authorization'
       )
@@ -39,7 +40,7 @@ describe('node-green-button-subscriber', () => {
 
       assert.ok(response !== undefined)
 
-      const entries = greenButtonParser.helpers.getEntriesByContentType(
+      const entries = greenButtonHelpers.getEntriesByContentType(
         response,
         'Customer'
       )
@@ -59,7 +60,7 @@ describe('node-green-button-subscriber', () => {
 
       assert.ok(response !== undefined)
 
-      const entries = greenButtonParser.helpers.getEntriesByContentType(
+      const entries = greenButtonHelpers.getEntriesByContentType(
         response,
         'CustomerAccount'
       )
@@ -80,7 +81,7 @@ describe('node-green-button-subscriber', () => {
 
       assert.ok(response !== undefined)
 
-      const entries = greenButtonParser.helpers.getEntriesByContentType(
+      const entries = greenButtonHelpers.getEntriesByContentType(
         response,
         'CustomerAgreement'
       )
@@ -99,7 +100,12 @@ describe('node-green-button-subscriber', () => {
 
       assert.ok(response !== undefined)
 
-      const entries = greenButtonParser.helpers.getEntriesByContentType(
+      await fs.writeFile(
+        './test/_output/batchSubscription.json',
+        JSON.stringify(response, undefined, 2)
+      )
+
+      const entries = greenButtonHelpers.getEntriesByContentType(
         response,
         'IntervalBlock'
       )
