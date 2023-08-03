@@ -59,6 +59,7 @@ export async function getEndpoint(endpoint) {
     catch (error) {
         debug('Error accessing API endpoint:', error.response.data);
     }
+    return undefined;
 }
 export async function getGreenButtonEndpoint(greenButtonEndpoint) {
     const greenButtonXml = await getEndpoint('DataCustodian/espi/1_1/resource' + greenButtonEndpoint);

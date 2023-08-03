@@ -95,11 +95,12 @@ export async function getEndpoint(
 
   try {
     const response = await axios.get(apiEndpoint, { headers })
-
     return response.data
   } catch (error) {
     debug('Error accessing API endpoint:', error.response.data)
   }
+
+  return undefined
 }
 
 export async function getGreenButtonEndpoint(
