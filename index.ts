@@ -5,8 +5,11 @@ import {
   atomToGreenButtonJson,
   type types as greenButtonTypes
 } from '@cityssm/green-button-parser'
-import axios from 'axios'
+import axios, { type AxiosRequestConfig } from 'axios'
 import Debug from 'debug'
+
+import type { DateTimeFilters } from './types.js'
+import { formatDateTimeFiltersParameters } from './utilities.js'
 
 const debug = Debug('green-button-subscriber')
 
@@ -76,7 +79,8 @@ async function getAccessToken(): Promise<void> {
 }
 
 export async function getEndpoint(
-  endpoint: string
+  endpoint: string,
+  getParameters: Record<string, string> = {}
 ): Promise<string | undefined> {
   if (_token === undefined || Date.now() >= _token.expires_in * 1000) {
     // If the token is not obtained or has expired, get a new one
@@ -92,8 +96,16 @@ export async function getEndpoint(
   const apiEndpoint = _configuration.baseUrl + endpoint
   debug(`End Point: ${apiEndpoint}`)
 
+  const requestOptions: AxiosRequestConfig = {
+    headers
+  }
+
+  if (getParameters !== undefined && Object.keys(getParameters).length > 0) {
+    requestOptions.params = getParameters
+  }
+
   try {
-    const response = await axios.get(apiEndpoint, { headers })
+    const response = await axios.get(apiEndpoint, requestOptions)
     return response.data
   } catch (error) {
     debug('Error accessing API endpoint:', error.response.data)
@@ -103,10 +115,12 @@ export async function getEndpoint(
 }
 
 export async function getGreenButtonEndpoint(
-  greenButtonEndpoint: `/${string}`
+  greenButtonEndpoint: `/${string}`,
+  getParameters?: Record<string, string>
 ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
   const greenButtonXml = await getEndpoint(
-    `DataCustodian/espi/1_1/resource${greenButtonEndpoint}`
+    `DataCustodian/espi/1_1/resource${greenButtonEndpoint}`,
+    getParameters
   )
 
   if (greenButtonXml === undefined) {
@@ -244,9 +258,13 @@ export async function getCustomerAgreements(
  * @returns
  */
 export async function getBatchSubscriptionsByAuthorization(
-  authorizationId: string
+  authorizationId: string,
+  dateTimeFilters?: DateTimeFilters
 ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
-  return await getGreenButtonEndpoint(`/Batch/Subscription/${authorizationId}`)
+  return await getGreenButtonEndpoint(
+    `/Batch/Subscription/${authorizationId}`,
+    formatDateTimeFiltersParameters(dateTimeFilters)
+  )
 }
 
 /**
@@ -258,10 +276,12 @@ export async function getBatchSubscriptionsByAuthorization(
  */
 export async function getBatchSubscriptionsByMeter(
   authorizationId: string,
-  meterId: string
+  meterId: string,
+  dateTimeFilters?: DateTimeFilters
 ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
   return await getGreenButtonEndpoint(
-    `/Batch/Subscription/${authorizationId}/UsagePoint/${meterId}`
+    `/Batch/Subscription/${authorizationId}/UsagePoint/${meterId}`,
+    formatDateTimeFiltersParameters(dateTimeFilters)
   )
 }
 

@@ -126,7 +126,9 @@ describe('node-green-button-subscriber', () => {
     });
     it('Retrieves batch subscriptions by authorization', async () => {
         try {
-            const response = await greenButtonSubscriber.getBatchSubscriptionsByAuthorization(authorizationId);
+            const response = await greenButtonSubscriber.getBatchSubscriptionsByAuthorization(authorizationId, {
+                publishedMax: new Date(2023, 3 - 1, 28)
+            });
             assert.ok(response !== undefined);
             const entries = greenButtonHelpers.getEntriesByContentType(response, 'IntervalBlock');
             assert.ok(entries.length > 0);
@@ -138,7 +140,10 @@ describe('node-green-button-subscriber', () => {
     });
     it('Retrieves batch subscriptions by meter', async () => {
         try {
-            const response = await greenButtonSubscriber.getBatchSubscriptionsByMeter(authorizationId, meterId);
+            const response = await greenButtonSubscriber.getBatchSubscriptionsByMeter(authorizationId, meterId, {
+                publishedMin: new Date(2023, 7 - 1, 1),
+                publishedMax: '2023-08-31T23:59:59Z'
+            });
             assert.ok(response !== undefined);
             const entries = greenButtonHelpers.getEntriesByContentType(response, 'IntervalBlock');
             assert.ok(entries.length > 0);

@@ -219,7 +219,10 @@ describe('node-green-button-subscriber', () => {
     try {
       const response =
         await greenButtonSubscriber.getBatchSubscriptionsByAuthorization(
-          authorizationId
+          authorizationId,
+          {
+            publishedMax: new Date(2023, 3 - 1, 28)
+          }
         )
 
       assert.ok(response !== undefined)
@@ -239,7 +242,11 @@ describe('node-green-button-subscriber', () => {
     try {
       const response = await greenButtonSubscriber.getBatchSubscriptionsByMeter(
         authorizationId,
-        meterId
+        meterId,
+        {
+          publishedMin: new Date(2023, 7 - 1, 1),
+          publishedMax: '2023-08-31T23:59:59Z'
+        }
       )
 
       assert.ok(response !== undefined)

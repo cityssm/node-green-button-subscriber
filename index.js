@@ -1,6 +1,7 @@
 import { atomToGreenButtonJson } from '@cityssm/green-button-parser';
 import axios from 'axios';
 import Debug from 'debug';
+import { formatDateTimeFiltersParameters } from './utilities.js';
 const debug = Debug('green-button-subscriber');
 let _configuration;
 let _token;
@@ -42,7 +43,7 @@ async function getAccessToken() {
         debug('Error getting access token:', error.response.data);
     }
 }
-export async function getEndpoint(endpoint) {
+export async function getEndpoint(endpoint, getParameters = {}) {
     if (_token === undefined || Date.now() >= _token.expires_in * 1000) {
         debug('Token expired.');
         await getAccessToken();
@@ -52,8 +53,14 @@ export async function getEndpoint(endpoint) {
     };
     const apiEndpoint = _configuration.baseUrl + endpoint;
     debug(`End Point: ${apiEndpoint}`);
+    const requestOptions = {
+        headers
+    };
+    if (getParameters !== undefined && Object.keys(getParameters).length > 0) {
+        requestOptions.params = getParameters;
+    }
     try {
-        const response = await axios.get(apiEndpoint, { headers });
+        const response = await axios.get(apiEndpoint, requestOptions);
         return response.data;
     }
     catch (error) {
@@ -61,8 +68,8 @@ export async function getEndpoint(endpoint) {
     }
     return undefined;
 }
-export async function getGreenButtonEndpoint(greenButtonEndpoint) {
-    const greenButtonXml = await getEndpoint(`DataCustodian/espi/1_1/resource${greenButtonEndpoint}`);
+export async function getGreenButtonEndpoint(greenButtonEndpoint, getParameters) {
+    const greenButtonXml = await getEndpoint(`DataCustodian/espi/1_1/resource${greenButtonEndpoint}`, getParameters);
     if (greenButtonXml === undefined) {
         return undefined;
     }
@@ -98,11 +105,11 @@ export async function getCustomerAccounts(authorizationId, customerId) {
 export async function getCustomerAgreements(authorizationId, customerId, customerAccountId) {
     return await getGreenButtonEndpoint(`/RetailCustomer/${authorizationId}/Customer/${customerId}/CustomerAccount/${customerAccountId}/CustomerAgreement`);
 }
-export async function getBatchSubscriptionsByAuthorization(authorizationId) {
-    return await getGreenButtonEndpoint(`/Batch/Subscription/${authorizationId}`);
+export async function getBatchSubscriptionsByAuthorization(authorizationId, dateTimeFilters) {
+    return await getGreenButtonEndpoint(`/Batch/Subscription/${authorizationId}`, formatDateTimeFiltersParameters(dateTimeFilters));
 }
-export async function getBatchSubscriptionsByMeter(authorizationId, meterId) {
-    return await getGreenButtonEndpoint(`/Batch/Subscription/${authorizationId}/UsagePoint/${meterId}`);
+export async function getBatchSubscriptionsByMeter(authorizationId, meterId, dateTimeFilters) {
+    return await getGreenButtonEndpoint(`/Batch/Subscription/${authorizationId}/UsagePoint/${meterId}`, formatDateTimeFiltersParameters(dateTimeFilters));
 }
 export default {
     setConfiguration,
