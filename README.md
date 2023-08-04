@@ -1,4 +1,4 @@
-# Green Button® Subscriber
+# Green Button® Subscriber for Node
 
 [![npm (scoped)](https://img.shields.io/npm/v/%40cityssm/green-button-subscriber)](https://www.npmjs.com/package/@cityssm/green-button-subscriber)
 [![DeepSource](https://app.deepsource.com/gh/cityssm/node-green-button-subscriber.svg/?label=active+issues&show_trend=true&token=9oj_5qvTuBqQRgbaUdjUnjOv)](https://app.deepsource.com/gh/cityssm/node-green-button-subscriber/?ref=repository-badge)
