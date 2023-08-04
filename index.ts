@@ -89,9 +89,7 @@ export async function getEndpoint(
     Authorization: `Bearer ${_token.access_token}`
   }
 
-  // Replace 'YOUR_API_ENDPOINT' with the actual API endpoint you want to access
   const apiEndpoint = _configuration.baseUrl + endpoint
-
   debug(`End Point: ${apiEndpoint}`)
 
   try {
@@ -118,10 +116,98 @@ export async function getGreenButtonEndpoint(
   return await atomToGreenButtonJson(greenButtonXml)
 }
 
+/**
+ * Get a list of Authorizations from customers.
+ * @returns GreenButtonJson with Authorization content entries.
+ */
 export async function getAuthorizations(): Promise<
   greenButtonTypes.GreenButtonJson | undefined
 > {
   return await getGreenButtonEndpoint('/Authorization')
+}
+
+/**
+ * Get a specific customer authorization.
+ * @param authorizationId
+ * @returns GreenButtonJson with Authorization content entries.
+ */
+export async function getAuthorization(
+  authorizationId: string
+): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+  return await getGreenButtonEndpoint(`/Authorization/${authorizationId}`)
+}
+
+/**
+ * Get a list of Usage Points.
+ * @param authorizationId
+ * @returns GreenButtonJson with UsagePoint content entries.
+ */
+export async function getUsagePoints(
+  authorizationId: string
+): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+  return await getGreenButtonEndpoint(
+    `/Subscription/${authorizationId}/UsagePoint`
+  )
+}
+
+/**
+ * Get a list of Meter Readings.
+ * @param authorizationId
+ * @param meterId
+ * @returns GreenButtonJson with MeterReading content entries.
+ */
+export async function getMeterReadings(
+  authorizationId: string,
+  meterId: string
+): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+  return await getGreenButtonEndpoint(
+    `/Subscription/${authorizationId}/UsagePoint/${meterId}/MeterReading`
+  )
+}
+
+/**
+ * Get a list of Interval Blocks.
+ * @param authorizationId
+ * @returns GreenButtonJson with MeterReading content entries.
+ */
+export async function getIntervalBlocks(
+  authorizationId: string,
+  meterId: string,
+  readingId: string
+): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+  return await getGreenButtonEndpoint(
+    `/Subscription/${authorizationId}/UsagePoint/${meterId}/MeterReading/${readingId}/IntervalBlock`
+  )
+}
+
+/**
+ * Get a list of Usage Summaries.
+ * @param authorizationId
+ * @param meterId
+ * @returns GreenButtonJson with UsageSummary content entries.
+ */
+export async function getUsageSummaries(
+  authorizationId: string,
+  meterId: string
+): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+  return await getGreenButtonEndpoint(
+    `/Subscription/${authorizationId}/UsagePoint/${meterId}/UsageSummary`
+  )
+}
+
+/**
+ * Get a list of Electric Power Quaility Summaries.
+ * @param authorizationId
+ * @param meterId
+ * @returns GreenButtonJson with ElectricPowerQualitySummary content entries.
+ */
+export async function getElectricPowerQualitySummaries(
+  authorizationId: string,
+  meterId: string
+): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+  return await getGreenButtonEndpoint(
+    `/Subscription/${authorizationId}/UsagePoint/${meterId}/ElectricPowerQualitySummary`
+  )
 }
 
 export async function getCustomers(
@@ -152,12 +238,29 @@ export async function getCustomerAgreements(
 }
 
 /**
- * Get a feed with all data (usage points, usage summaries, interval blocks, etc.)
+ * Get all data (usage points, usage summaries, interval blocks, etc.)
+ * for a specific Authorization
  * @param authorizationId
  * @returns
  */
-export async function getBatchSubscriptions(
+export async function getBatchSubscriptionsByAuthorization(
   authorizationId: string
 ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
   return await getGreenButtonEndpoint(`/Batch/Subscription/${authorizationId}`)
+}
+
+/**
+ * Get all data (usage points, usage summaries, interval blocks, etc.)
+ * for a specific Meter
+ * @param authorizationId
+ * @param meterId
+ * @returns
+ */
+export async function getBatchSubscriptionsByMeter(
+  authorizationId: string,
+  meterId: string
+): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+  return await getGreenButtonEndpoint(
+    `/Batch/Subscription/${authorizationId}/UsagePoint/${meterId}`
+  )
 }

@@ -71,6 +71,24 @@ export async function getGreenButtonEndpoint(greenButtonEndpoint) {
 export async function getAuthorizations() {
     return await getGreenButtonEndpoint('/Authorization');
 }
+export async function getAuthorization(authorizationId) {
+    return await getGreenButtonEndpoint(`/Authorization/${authorizationId}`);
+}
+export async function getUsagePoints(authorizationId) {
+    return await getGreenButtonEndpoint(`/Subscription/${authorizationId}/UsagePoint`);
+}
+export async function getMeterReadings(authorizationId, meterId) {
+    return await getGreenButtonEndpoint(`/Subscription/${authorizationId}/UsagePoint/${meterId}/MeterReading`);
+}
+export async function getIntervalBlocks(authorizationId, meterId, readingId) {
+    return await getGreenButtonEndpoint(`/Subscription/${authorizationId}/UsagePoint/${meterId}/MeterReading/${readingId}/IntervalBlock`);
+}
+export async function getUsageSummaries(authorizationId, meterId) {
+    return await getGreenButtonEndpoint(`/Subscription/${authorizationId}/UsagePoint/${meterId}/UsageSummary`);
+}
+export async function getElectricPowerQualitySummaries(authorizationId, meterId) {
+    return await getGreenButtonEndpoint(`/Subscription/${authorizationId}/UsagePoint/${meterId}/ElectricPowerQualitySummary`);
+}
 export async function getCustomers(authorizationId) {
     return await getGreenButtonEndpoint(`/RetailCustomer/${authorizationId}/Customer`);
 }
@@ -80,6 +98,9 @@ export async function getCustomerAccounts(authorizationId, customerId) {
 export async function getCustomerAgreements(authorizationId, customerId, customerAccountId) {
     return await getGreenButtonEndpoint(`/RetailCustomer/${authorizationId}/Customer/${customerId}/CustomerAccount/${customerAccountId}/CustomerAgreement`);
 }
-export async function getBatchSubscriptions(authorizationId) {
+export async function getBatchSubscriptionsByAuthorization(authorizationId) {
     return await getGreenButtonEndpoint(`/Batch/Subscription/${authorizationId}`);
+}
+export async function getBatchSubscriptionsByMeter(authorizationId, meterId) {
+    return await getGreenButtonEndpoint(`/Batch/Subscription/${authorizationId}/UsagePoint/${meterId}`);
 }
