@@ -47,7 +47,7 @@ async function getAccessToken(): Promise<void> {
   }
 
   try {
-    const authorizeUrl = _configuration.baseUrl + 'oauth/authorize'
+    const authorizeUrl = `${_configuration.baseUrl}oauth/authorize`
 
     debug(`Authorize URL: ${authorizeUrl}`)
 
@@ -106,7 +106,7 @@ export async function getGreenButtonEndpoint(
   greenButtonEndpoint: `/${string}`
 ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
   const greenButtonXml = await getEndpoint(
-    'DataCustodian/espi/1_1/resource' + greenButtonEndpoint
+    `DataCustodian/espi/1_1/resource${greenButtonEndpoint}`
   )
 
   if (greenButtonXml === undefined) {

@@ -22,7 +22,7 @@ async function getAccessToken() {
         return;
     }
     try {
-        const authorizeUrl = _configuration.baseUrl + 'oauth/authorize';
+        const authorizeUrl = `${_configuration.baseUrl}oauth/authorize`;
         debug(`Authorize URL: ${authorizeUrl}`);
         const response = await axios.post(authorizeUrl, {
             response_type: 'code',
@@ -62,7 +62,7 @@ export async function getEndpoint(endpoint) {
     return undefined;
 }
 export async function getGreenButtonEndpoint(greenButtonEndpoint) {
-    const greenButtonXml = await getEndpoint('DataCustodian/espi/1_1/resource' + greenButtonEndpoint);
+    const greenButtonXml = await getEndpoint(`DataCustodian/espi/1_1/resource${greenButtonEndpoint}`);
     if (greenButtonXml === undefined) {
         return undefined;
     }
