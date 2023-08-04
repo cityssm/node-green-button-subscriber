@@ -1,5 +1,4 @@
 import assert from 'node:assert'
-import fs from 'node:fs/promises'
 
 import { helpers as greenButtonHelpers } from '@cityssm/green-button-parser'
 
