@@ -17,7 +17,9 @@
     "xml-parser"
   ],
   "exports": {
-    ".": "./index.js"
+    ".": "./index.js",
+    "./index": "./index.js",
+    "./index.js": "./index.js"
   },
   "scripts": {
     "test": "cross-env NODE_ENV=dev DEBUG=green-button-*  mocha --timeout 60000",

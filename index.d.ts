@@ -21,3 +21,23 @@ export declare function getCustomerAccounts(authorizationId: string, customerId:
 export declare function getCustomerAgreements(authorizationId: string, customerId: string, customerAccountId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
 export declare function getBatchSubscriptionsByAuthorization(authorizationId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
 export declare function getBatchSubscriptionsByMeter(authorizationId: string, meterId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
+declare const _default: {
+    setConfiguration: typeof setConfiguration;
+    setUtilityApiConfiguration: typeof setUtilityApiConfiguration;
+    getEndpoint: typeof getEndpoint;
+    getGreenButtonEndpoint: typeof getGreenButtonEndpoint;
+    getAuthorizations: typeof getAuthorizations;
+    getAuthorization: typeof getAuthorization;
+    getUsagePoints: typeof getUsagePoints;
+    getMeterReadings: typeof getMeterReadings;
+    getIntervalBlocks: typeof getIntervalBlocks;
+    getUsageSummaries: typeof getUsageSummaries;
+    getElectricPowerQualitySummaries: typeof getElectricPowerQualitySummaries;
+    getCustomers: typeof getCustomers;
+    getCustomerAccounts: typeof getCustomerAccounts;
+    getCustomerAgreements: typeof getCustomerAgreements;
+    getBatchSubscriptionsByAuthorization: typeof getBatchSubscriptionsByAuthorization;
+    getBatchSubscriptionsByMeter: typeof getBatchSubscriptionsByMeter;
+};
+export default _default;
+export type * as types from '@cityssm/green-button-parser/types/entryTypes.js';

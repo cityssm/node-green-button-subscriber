@@ -104,3 +104,21 @@ export async function getBatchSubscriptionsByAuthorization(authorizationId) {
 export async function getBatchSubscriptionsByMeter(authorizationId, meterId) {
     return await getGreenButtonEndpoint(`/Batch/Subscription/${authorizationId}/UsagePoint/${meterId}`);
 }
+export default {
+    setConfiguration,
+    setUtilityApiConfiguration,
+    getEndpoint,
+    getGreenButtonEndpoint,
+    getAuthorizations,
+    getAuthorization,
+    getUsagePoints,
+    getMeterReadings,
+    getIntervalBlocks,
+    getUsageSummaries,
+    getElectricPowerQualitySummaries,
+    getCustomers,
+    getCustomerAccounts,
+    getCustomerAgreements,
+    getBatchSubscriptionsByAuthorization,
+    getBatchSubscriptionsByMeter
+};

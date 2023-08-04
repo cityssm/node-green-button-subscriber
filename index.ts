@@ -264,3 +264,24 @@ export async function getBatchSubscriptionsByMeter(
     `/Batch/Subscription/${authorizationId}/UsagePoint/${meterId}`
   )
 }
+
+export default {
+  setConfiguration,
+  setUtilityApiConfiguration,
+  getEndpoint,
+  getGreenButtonEndpoint,
+  getAuthorizations,
+  getAuthorization,
+  getUsagePoints,
+  getMeterReadings,
+  getIntervalBlocks,
+  getUsageSummaries,
+  getElectricPowerQualitySummaries,
+  getCustomers,
+  getCustomerAccounts,
+  getCustomerAgreements,
+  getBatchSubscriptionsByAuthorization,
+  getBatchSubscriptionsByMeter
+}
+
+export type * as types from '@cityssm/green-button-parser/types/entryTypes.js'
