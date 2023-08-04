@@ -5,8 +5,9 @@
   "engines": {
     "node": "^14.13.1 || >=16.0.0"
   },
-  "description": "Handles the OAuth authentication, downloading, and parsing of Green Button API data.",
+  "description": "Handles the OAuth authentication, downloading, and parsing of Green Button® data.",
   "keywords": [
+    "connect-my-data",
     "energy",
     "energy-consumption",
     "energy-usage",
