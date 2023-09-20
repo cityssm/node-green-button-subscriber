@@ -1,8 +1,9 @@
 import assert from 'node:assert'
+import fs from 'node:fs'
 
 import { helpers as greenButtonHelpers } from '@cityssm/green-button-parser'
 
-import * as greenButtonSubscriber from '../index.js'
+import { GreenButtonSubscriber } from '../index.js'
 
 import {
   authorizationId,
@@ -14,8 +15,10 @@ import {
 } from './config.js'
 
 describe('node-green-button-subscriber', () => {
+  let greenButtonSubscriber: GreenButtonSubscriber
+
   before(() => {
-    greenButtonSubscriber.setConfiguration(config)
+    greenButtonSubscriber = new GreenButtonSubscriber(config)
   })
 
   it('Retrieves authorizations', async () => {
@@ -28,6 +31,9 @@ describe('node-green-button-subscriber', () => {
         response,
         'Authorization'
       )
+
+      console.log(JSON.stringify(entries, undefined, 2))
+
       assert.ok(entries.length > 0)
     } catch (error) {
       console.error(error)
@@ -227,6 +233,11 @@ describe('node-green-button-subscriber', () => {
 
       assert.ok(response !== undefined)
 
+      fs.writeFileSync(
+        'test/_output/batchSubscription.json',
+        JSON.stringify(response, undefined, 2)
+      )
+
       const entries = greenButtonHelpers.getEntriesByContentType(
         response,
         'IntervalBlock'
@@ -242,11 +253,7 @@ describe('node-green-button-subscriber', () => {
     try {
       const response = await greenButtonSubscriber.getBatchSubscriptionsByMeter(
         authorizationId,
-        meterId,
-        {
-          publishedMin: new Date(2023, 7 - 1, 1),
-          publishedMax: '2023-08-31T23:59:59Z'
-        }
+        meterId
       )
 
       assert.ok(response !== undefined)

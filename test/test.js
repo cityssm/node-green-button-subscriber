@@ -1,16 +1,19 @@
 import assert from 'node:assert';
+import fs from 'node:fs';
 import { helpers as greenButtonHelpers } from '@cityssm/green-button-parser';
-import * as greenButtonSubscriber from '../index.js';
+import { GreenButtonSubscriber } from '../index.js';
 import { authorizationId, config, customerAccountId, customerId, meterId, readingId } from './config.js';
 describe('node-green-button-subscriber', () => {
+    let greenButtonSubscriber;
     before(() => {
-        greenButtonSubscriber.setConfiguration(config);
+        greenButtonSubscriber = new GreenButtonSubscriber(config);
     });
     it('Retrieves authorizations', async () => {
         try {
             const response = await greenButtonSubscriber.getAuthorizations();
             assert.ok(response !== undefined);
             const entries = greenButtonHelpers.getEntriesByContentType(response, 'Authorization');
+            console.log(JSON.stringify(entries, undefined, 2));
             assert.ok(entries.length > 0);
         }
         catch (error) {
@@ -130,6 +133,7 @@ describe('node-green-button-subscriber', () => {
                 publishedMax: new Date(2023, 3 - 1, 28)
             });
             assert.ok(response !== undefined);
+            fs.writeFileSync('test/_output/batchSubscription.json', JSON.stringify(response, undefined, 2));
             const entries = greenButtonHelpers.getEntriesByContentType(response, 'IntervalBlock');
             assert.ok(entries.length > 0);
         }
@@ -140,10 +144,7 @@ describe('node-green-button-subscriber', () => {
     });
     it('Retrieves batch subscriptions by meter', async () => {
         try {
-            const response = await greenButtonSubscriber.getBatchSubscriptionsByMeter(authorizationId, meterId, {
-                publishedMin: new Date(2023, 7 - 1, 1),
-                publishedMax: '2023-08-31T23:59:59Z'
-            });
+            const response = await greenButtonSubscriber.getBatchSubscriptionsByMeter(authorizationId, meterId);
             assert.ok(response !== undefined);
             const entries = greenButtonHelpers.getEntriesByContentType(response, 'IntervalBlock');
             assert.ok(entries.length > 0);

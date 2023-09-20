@@ -34,10 +34,10 @@ npm install @cityssm/green-button-subscriber
 ⭐ All output is parsed and returned as a fully typed object. ⭐
 
 ```javascript
-import * as greenButtonSubscriber from '@cityssm/green-button-subscriber'
+import { GreenButtonSubscriber } from '@cityssm/green-button-subscriber'
 
 // Pass the base URL, client ID, client secret, etc.
-greenButtonSubscriber.setConfiguration(config)
+const greenButtonSubscriber = new GreenButtonSubscriber(config)
 
 // Get the authorizations
 const greenButtonJson = await greenButtonSubscriber.getAuthorizations()

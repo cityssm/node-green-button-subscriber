@@ -3,7 +3,7 @@ import assert from 'node:assert'
 import type { DateTimeFilters, IsoDateString } from '../types.js'
 import { formatDateTimeFiltersParameters } from '../utilities.js'
 
-describe('node-green-button-subscriber/helpers', () => {
+describe('node-green-button-subscriber/utilities', () => {
   it('Formats Dates and ISO strings properly', () => {
     const isoDate: IsoDateString = '2023-01-02T12:34:56Z'
 

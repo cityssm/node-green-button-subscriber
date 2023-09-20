@@ -13,295 +13,290 @@ import { formatDateTimeFiltersParameters } from './utilities.js'
 
 const debug = Debug('green-button-subscriber')
 
-export interface Configuration {
+export interface GreenButtonSubscriberConfiguration {
   baseUrl: `${string}/`
   clientId?: string
   clientSecret?: string
   accessToken?: string
 }
 
-let _configuration: Configuration
-let _token: {
-  access_token: string
-  expires_in: number
-}
+export class GreenButtonSubscriber {
+  _configuration: GreenButtonSubscriberConfiguration
+  _token: {
+    access_token: string
+    expires_in: number
+  }
 
-export function setConfiguration(configuration: Configuration): void {
-  _configuration = configuration
-}
-
-export function setUtilityApiConfiguration(
-  apiToken: string,
-  baseUrl: `${string}/` = 'https://utilityapi.com/'
-): void {
-  setConfiguration({
-    baseUrl,
-    accessToken: apiToken
-  })
-}
-
-async function getAccessToken(): Promise<void> {
-  if (_configuration.accessToken !== undefined) {
-    _token = {
-      access_token: _configuration.accessToken,
-      expires_in: Number.POSITIVE_INFINITY
+  constructor(configuration?: GreenButtonSubscriberConfiguration) {
+    if (configuration !== undefined) {
+      this.setConfiguration(configuration)
     }
-    return
   }
 
-  try {
-    const authorizeUrl = `${_configuration.baseUrl}oauth/authorize`
+  setConfiguration(configuration: GreenButtonSubscriberConfiguration): void {
+    this._configuration = configuration
+  }
 
-    debug(`Authorize URL: ${authorizeUrl}`)
+  setUtilityApiConfiguration(
+    apiToken: string,
+    baseUrl: `${string}/` = 'https://utilityapi.com/'
+  ): void {
+    this.setConfiguration({
+      baseUrl,
+      accessToken: apiToken
+    })
+  }
 
-    const response = await axios.post(
-      authorizeUrl,
-      {
-        response_type: 'code',
-        grant_type: 'client_credentials',
-        client_id: _configuration.clientId,
-        client_secret: _configuration.clientSecret
-      },
-      {
-        headers: {
-          Referer: _configuration.baseUrl
-        }
+  async getAccessToken(): Promise<void> {
+    if (this._configuration.accessToken !== undefined) {
+      this._token = {
+        access_token: this._configuration.accessToken,
+        expires_in: Number.POSITIVE_INFINITY
       }
-    )
+      return
+    }
 
-    _token = response.data
+    try {
+      const authorizeUrl = `${this._configuration.baseUrl}oauth/authorize`
 
-    debug('Access token obtained successfully.')
-    debug('Access Token:', _token.access_token)
-  } catch (error) {
-    debug('Error getting access token:', error.response.data)
-  }
-}
+      debug(`Authorize URL: ${authorizeUrl}`)
 
-export async function getEndpoint(
-  endpoint: string,
-  getParameters: Record<string, string> = {}
-): Promise<string | undefined> {
-  if (_token === undefined || Date.now() >= _token.expires_in * 1000) {
-    // If the token is not obtained or has expired, get a new one
-    debug('Token expired.')
-    await getAccessToken()
-  }
+      const response = await axios.post(
+        authorizeUrl,
+        {
+          response_type: 'code',
+          grant_type: 'client_credentials',
+          client_id: this._configuration.clientId,
+          client_secret: this._configuration.clientSecret
+        },
+        {
+          headers: {
+            Referer: this._configuration.baseUrl
+          }
+        }
+      )
 
-  // Set the access token in the request headers
-  const headers = {
-    Authorization: `Bearer ${_token.access_token}`
-  }
+      this._token = response.data
 
-  const apiEndpoint = _configuration.baseUrl + endpoint
-  debug(`End Point: ${apiEndpoint}`)
-
-  const requestOptions: AxiosRequestConfig = {
-    headers
-  }
-
-  if (getParameters !== undefined && Object.keys(getParameters).length > 0) {
-    requestOptions.params = getParameters
+      debug('Access token obtained successfully.')
+      debug('Access Token:', this._token.access_token)
+    } catch (error) {
+      debug('Error getting access token:', error.response.data)
+    }
   }
 
-  try {
-    const response = await axios.get(apiEndpoint, requestOptions)
-    return response.data
-  } catch (error) {
-    debug('Error accessing API endpoint:', error.response.data)
-  }
+  async getEndpoint(
+    endpoint: string,
+    getParameters: Record<string, string> = {}
+  ): Promise<string | undefined> {
+    if (
+      this._token === undefined ||
+      Date.now() >= this._token.expires_in * 1000
+    ) {
+      // If the token is not obtained or has expired, get a new one
+      debug('Token expired.')
+      await this.getAccessToken()
+    }
 
-  return undefined
-}
+    // Set the access token in the request headers
+    const headers = {
+      Authorization: `Bearer ${this._token.access_token}`
+    }
 
-export async function getGreenButtonEndpoint(
-  greenButtonEndpoint: `/${string}`,
-  getParameters?: Record<string, string>
-): Promise<greenButtonTypes.GreenButtonJson | undefined> {
-  const greenButtonXml = await getEndpoint(
-    `DataCustodian/espi/1_1/resource${greenButtonEndpoint}`,
-    getParameters
-  )
+    const apiEndpoint = this._configuration.baseUrl + endpoint
+    debug(`End Point: ${apiEndpoint}`)
 
-  if (greenButtonXml === undefined) {
+    const requestOptions: AxiosRequestConfig = {
+      headers
+    }
+
+    if (getParameters !== undefined && Object.keys(getParameters).length > 0) {
+      requestOptions.params = getParameters
+    }
+
+    try {
+      const response = await axios.get(apiEndpoint, requestOptions)
+      return response.data
+    } catch (error) {
+      debug('Error accessing API endpoint:', error.response.data)
+    }
+
     return undefined
   }
 
-  return await atomToGreenButtonJson(greenButtonXml)
+  async getGreenButtonEndpoint(
+    greenButtonEndpoint: `/${string}`,
+    getParameters?: Record<string, string>
+  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+    const greenButtonXml = await this.getEndpoint(
+      `DataCustodian/espi/1_1/resource${greenButtonEndpoint}`,
+      getParameters
+    )
+
+    if (greenButtonXml === undefined) {
+      return undefined
+    }
+
+    return await atomToGreenButtonJson(greenButtonXml)
+  }
+
+  /**
+   * Get a list of Authorizations from customers.
+   * @returns GreenButtonJson with Authorization content entries.
+   */
+  async getAuthorizations(): Promise<
+    greenButtonTypes.GreenButtonJson | undefined
+  > {
+    return await this.getGreenButtonEndpoint('/Authorization')
+  }
+
+  /**
+   * Get a specific customer authorization.
+   * @param authorizationId
+   * @returns GreenButtonJson with Authorization content entries.
+   */
+  async getAuthorization(
+    authorizationId: string
+  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+    return await this.getGreenButtonEndpoint(
+      `/Authorization/${authorizationId}`
+    )
+  }
+
+  /**
+   * Get a list of Usage Points.
+   * @param authorizationId
+   * @returns GreenButtonJson with UsagePoint content entries.
+   */
+  async getUsagePoints(
+    authorizationId: string
+  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+    return await this.getGreenButtonEndpoint(
+      `/Subscription/${authorizationId}/UsagePoint`
+    )
+  }
+
+  /**
+   * Get a list of Meter Readings.
+   * @param authorizationId
+   * @param meterId
+   * @returns GreenButtonJson with MeterReading content entries.
+   */
+  async getMeterReadings(
+    authorizationId: string,
+    meterId: string
+  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+    return await this.getGreenButtonEndpoint(
+      `/Subscription/${authorizationId}/UsagePoint/${meterId}/MeterReading`
+    )
+  }
+
+  /**
+   * Get a list of Interval Blocks.
+   * @param authorizationId
+   * @returns GreenButtonJson with MeterReading content entries.
+   */
+  async getIntervalBlocks(
+    authorizationId: string,
+    meterId: string,
+    readingId: string
+  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+    return await this.getGreenButtonEndpoint(
+      `/Subscription/${authorizationId}/UsagePoint/${meterId}/MeterReading/${readingId}/IntervalBlock`
+    )
+  }
+
+  /**
+   * Get a list of Usage Summaries.
+   * @param authorizationId
+   * @param meterId
+   * @returns GreenButtonJson with UsageSummary content entries.
+   */
+  async getUsageSummaries(
+    authorizationId: string,
+    meterId: string
+  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+    return await this.getGreenButtonEndpoint(
+      `/Subscription/${authorizationId}/UsagePoint/${meterId}/UsageSummary`
+    )
+  }
+
+  /**
+   * Get a list of Electric Power Quaility Summaries.
+   * @param authorizationId
+   * @param meterId
+   * @returns GreenButtonJson with ElectricPowerQualitySummary content entries.
+   */
+  async getElectricPowerQualitySummaries(
+    authorizationId: string,
+    meterId: string
+  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+    return await this.getGreenButtonEndpoint(
+      `/Subscription/${authorizationId}/UsagePoint/${meterId}/ElectricPowerQualitySummary`
+    )
+  }
+
+  async getCustomers(
+    authorizationId: string
+  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+    return await this.getGreenButtonEndpoint(
+      `/RetailCustomer/${authorizationId}/Customer`
+    )
+  }
+
+  async getCustomerAccounts(
+    authorizationId: string,
+    customerId: string
+  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+    return await this.getGreenButtonEndpoint(
+      `/RetailCustomer/${authorizationId}/Customer/${customerId}/CustomerAccount`
+    )
+  }
+
+  async getCustomerAgreements(
+    authorizationId: string,
+    customerId: string,
+    customerAccountId: string
+  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+    return await this.getGreenButtonEndpoint(
+      `/RetailCustomer/${authorizationId}/Customer/${customerId}/CustomerAccount/${customerAccountId}/CustomerAgreement`
+    )
+  }
+
+  /**
+   * Get all data (usage points, usage summaries, interval blocks, etc.)
+   * for a specific Authorization
+   * @param authorizationId
+   * @returns
+   */
+  async getBatchSubscriptionsByAuthorization(
+    authorizationId: string,
+    dateTimeFilters?: DateTimeFilters
+  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+    return await this.getGreenButtonEndpoint(
+      `/Batch/Subscription/${authorizationId}`,
+      formatDateTimeFiltersParameters(dateTimeFilters)
+    )
+  }
+
+  /**
+   * Get all data (usage points, usage summaries, interval blocks, etc.)
+   * for a specific Meter
+   * @param authorizationId
+   * @param meterId
+   * @returns
+   */
+  async getBatchSubscriptionsByMeter(
+    authorizationId: string,
+    meterId: string,
+    dateTimeFilters?: DateTimeFilters
+  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+    return await this.getGreenButtonEndpoint(
+      `/Batch/Subscription/${authorizationId}/UsagePoint/${meterId}`,
+      formatDateTimeFiltersParameters(dateTimeFilters)
+    )
+  }
 }
 
-/**
- * Get a list of Authorizations from customers.
- * @returns GreenButtonJson with Authorization content entries.
- */
-export async function getAuthorizations(): Promise<
-  greenButtonTypes.GreenButtonJson | undefined
-> {
-  return await getGreenButtonEndpoint('/Authorization')
-}
-
-/**
- * Get a specific customer authorization.
- * @param authorizationId
- * @returns GreenButtonJson with Authorization content entries.
- */
-export async function getAuthorization(
-  authorizationId: string
-): Promise<greenButtonTypes.GreenButtonJson | undefined> {
-  return await getGreenButtonEndpoint(`/Authorization/${authorizationId}`)
-}
-
-/**
- * Get a list of Usage Points.
- * @param authorizationId
- * @returns GreenButtonJson with UsagePoint content entries.
- */
-export async function getUsagePoints(
-  authorizationId: string
-): Promise<greenButtonTypes.GreenButtonJson | undefined> {
-  return await getGreenButtonEndpoint(
-    `/Subscription/${authorizationId}/UsagePoint`
-  )
-}
-
-/**
- * Get a list of Meter Readings.
- * @param authorizationId
- * @param meterId
- * @returns GreenButtonJson with MeterReading content entries.
- */
-export async function getMeterReadings(
-  authorizationId: string,
-  meterId: string
-): Promise<greenButtonTypes.GreenButtonJson | undefined> {
-  return await getGreenButtonEndpoint(
-    `/Subscription/${authorizationId}/UsagePoint/${meterId}/MeterReading`
-  )
-}
-
-/**
- * Get a list of Interval Blocks.
- * @param authorizationId
- * @returns GreenButtonJson with MeterReading content entries.
- */
-export async function getIntervalBlocks(
-  authorizationId: string,
-  meterId: string,
-  readingId: string
-): Promise<greenButtonTypes.GreenButtonJson | undefined> {
-  return await getGreenButtonEndpoint(
-    `/Subscription/${authorizationId}/UsagePoint/${meterId}/MeterReading/${readingId}/IntervalBlock`
-  )
-}
-
-/**
- * Get a list of Usage Summaries.
- * @param authorizationId
- * @param meterId
- * @returns GreenButtonJson with UsageSummary content entries.
- */
-export async function getUsageSummaries(
-  authorizationId: string,
-  meterId: string
-): Promise<greenButtonTypes.GreenButtonJson | undefined> {
-  return await getGreenButtonEndpoint(
-    `/Subscription/${authorizationId}/UsagePoint/${meterId}/UsageSummary`
-  )
-}
-
-/**
- * Get a list of Electric Power Quaility Summaries.
- * @param authorizationId
- * @param meterId
- * @returns GreenButtonJson with ElectricPowerQualitySummary content entries.
- */
-export async function getElectricPowerQualitySummaries(
-  authorizationId: string,
-  meterId: string
-): Promise<greenButtonTypes.GreenButtonJson | undefined> {
-  return await getGreenButtonEndpoint(
-    `/Subscription/${authorizationId}/UsagePoint/${meterId}/ElectricPowerQualitySummary`
-  )
-}
-
-export async function getCustomers(
-  authorizationId: string
-): Promise<greenButtonTypes.GreenButtonJson | undefined> {
-  return await getGreenButtonEndpoint(
-    `/RetailCustomer/${authorizationId}/Customer`
-  )
-}
-
-export async function getCustomerAccounts(
-  authorizationId: string,
-  customerId: string
-): Promise<greenButtonTypes.GreenButtonJson | undefined> {
-  return await getGreenButtonEndpoint(
-    `/RetailCustomer/${authorizationId}/Customer/${customerId}/CustomerAccount`
-  )
-}
-
-export async function getCustomerAgreements(
-  authorizationId: string,
-  customerId: string,
-  customerAccountId: string
-): Promise<greenButtonTypes.GreenButtonJson | undefined> {
-  return await getGreenButtonEndpoint(
-    `/RetailCustomer/${authorizationId}/Customer/${customerId}/CustomerAccount/${customerAccountId}/CustomerAgreement`
-  )
-}
-
-/**
- * Get all data (usage points, usage summaries, interval blocks, etc.)
- * for a specific Authorization
- * @param authorizationId
- * @returns
- */
-export async function getBatchSubscriptionsByAuthorization(
-  authorizationId: string,
-  dateTimeFilters?: DateTimeFilters
-): Promise<greenButtonTypes.GreenButtonJson | undefined> {
-  return await getGreenButtonEndpoint(
-    `/Batch/Subscription/${authorizationId}`,
-    formatDateTimeFiltersParameters(dateTimeFilters)
-  )
-}
-
-/**
- * Get all data (usage points, usage summaries, interval blocks, etc.)
- * for a specific Meter
- * @param authorizationId
- * @param meterId
- * @returns
- */
-export async function getBatchSubscriptionsByMeter(
-  authorizationId: string,
-  meterId: string,
-  dateTimeFilters?: DateTimeFilters
-): Promise<greenButtonTypes.GreenButtonJson | undefined> {
-  return await getGreenButtonEndpoint(
-    `/Batch/Subscription/${authorizationId}/UsagePoint/${meterId}`,
-    formatDateTimeFiltersParameters(dateTimeFilters)
-  )
-}
-
-export default {
-  setConfiguration,
-  setUtilityApiConfiguration,
-  getEndpoint,
-  getGreenButtonEndpoint,
-  getAuthorizations,
-  getAuthorization,
-  getUsagePoints,
-  getMeterReadings,
-  getIntervalBlocks,
-  getUsageSummaries,
-  getElectricPowerQualitySummaries,
-  getCustomers,
-  getCustomerAccounts,
-  getCustomerAgreements,
-  getBatchSubscriptionsByAuthorization,
-  getBatchSubscriptionsByMeter
-}
-
-export type * as types from '@cityssm/green-button-parser/types/entryTypes.js'
+export type { types } from '@cityssm/green-button-parser'
+export { helpers } from '@cityssm/green-button-parser'

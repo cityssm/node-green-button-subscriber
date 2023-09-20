@@ -1,44 +1,35 @@
 import { type types as greenButtonTypes } from '@cityssm/green-button-parser';
 import type { DateTimeFilters } from './types.js';
-export interface Configuration {
+export interface GreenButtonSubscriberConfiguration {
     baseUrl: `${string}/`;
     clientId?: string;
     clientSecret?: string;
     accessToken?: string;
 }
-export declare function setConfiguration(configuration: Configuration): void;
-export declare function setUtilityApiConfiguration(apiToken: string, baseUrl?: `${string}/`): void;
-export declare function getEndpoint(endpoint: string, getParameters?: Record<string, string>): Promise<string | undefined>;
-export declare function getGreenButtonEndpoint(greenButtonEndpoint: `/${string}`, getParameters?: Record<string, string>): Promise<greenButtonTypes.GreenButtonJson | undefined>;
-export declare function getAuthorizations(): Promise<greenButtonTypes.GreenButtonJson | undefined>;
-export declare function getAuthorization(authorizationId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
-export declare function getUsagePoints(authorizationId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
-export declare function getMeterReadings(authorizationId: string, meterId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
-export declare function getIntervalBlocks(authorizationId: string, meterId: string, readingId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
-export declare function getUsageSummaries(authorizationId: string, meterId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
-export declare function getElectricPowerQualitySummaries(authorizationId: string, meterId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
-export declare function getCustomers(authorizationId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
-export declare function getCustomerAccounts(authorizationId: string, customerId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
-export declare function getCustomerAgreements(authorizationId: string, customerId: string, customerAccountId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
-export declare function getBatchSubscriptionsByAuthorization(authorizationId: string, dateTimeFilters?: DateTimeFilters): Promise<greenButtonTypes.GreenButtonJson | undefined>;
-export declare function getBatchSubscriptionsByMeter(authorizationId: string, meterId: string, dateTimeFilters?: DateTimeFilters): Promise<greenButtonTypes.GreenButtonJson | undefined>;
-declare const _default: {
-    setConfiguration: typeof setConfiguration;
-    setUtilityApiConfiguration: typeof setUtilityApiConfiguration;
-    getEndpoint: typeof getEndpoint;
-    getGreenButtonEndpoint: typeof getGreenButtonEndpoint;
-    getAuthorizations: typeof getAuthorizations;
-    getAuthorization: typeof getAuthorization;
-    getUsagePoints: typeof getUsagePoints;
-    getMeterReadings: typeof getMeterReadings;
-    getIntervalBlocks: typeof getIntervalBlocks;
-    getUsageSummaries: typeof getUsageSummaries;
-    getElectricPowerQualitySummaries: typeof getElectricPowerQualitySummaries;
-    getCustomers: typeof getCustomers;
-    getCustomerAccounts: typeof getCustomerAccounts;
-    getCustomerAgreements: typeof getCustomerAgreements;
-    getBatchSubscriptionsByAuthorization: typeof getBatchSubscriptionsByAuthorization;
-    getBatchSubscriptionsByMeter: typeof getBatchSubscriptionsByMeter;
-};
-export default _default;
-export type * as types from '@cityssm/green-button-parser/types/entryTypes.js';
+export declare class GreenButtonSubscriber {
+    _configuration: GreenButtonSubscriberConfiguration;
+    _token: {
+        access_token: string;
+        expires_in: number;
+    };
+    constructor(configuration?: GreenButtonSubscriberConfiguration);
+    setConfiguration(configuration: GreenButtonSubscriberConfiguration): void;
+    setUtilityApiConfiguration(apiToken: string, baseUrl?: `${string}/`): void;
+    getAccessToken(): Promise<void>;
+    getEndpoint(endpoint: string, getParameters?: Record<string, string>): Promise<string | undefined>;
+    getGreenButtonEndpoint(greenButtonEndpoint: `/${string}`, getParameters?: Record<string, string>): Promise<greenButtonTypes.GreenButtonJson | undefined>;
+    getAuthorizations(): Promise<greenButtonTypes.GreenButtonJson | undefined>;
+    getAuthorization(authorizationId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
+    getUsagePoints(authorizationId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
+    getMeterReadings(authorizationId: string, meterId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
+    getIntervalBlocks(authorizationId: string, meterId: string, readingId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
+    getUsageSummaries(authorizationId: string, meterId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
+    getElectricPowerQualitySummaries(authorizationId: string, meterId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
+    getCustomers(authorizationId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
+    getCustomerAccounts(authorizationId: string, customerId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
+    getCustomerAgreements(authorizationId: string, customerId: string, customerAccountId: string): Promise<greenButtonTypes.GreenButtonJson | undefined>;
+    getBatchSubscriptionsByAuthorization(authorizationId: string, dateTimeFilters?: DateTimeFilters): Promise<greenButtonTypes.GreenButtonJson | undefined>;
+    getBatchSubscriptionsByMeter(authorizationId: string, meterId: string, dateTimeFilters?: DateTimeFilters): Promise<greenButtonTypes.GreenButtonJson | undefined>;
+}
+export type { types } from '@cityssm/green-button-parser';
+export { helpers } from '@cityssm/green-button-parser';

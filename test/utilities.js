@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import { formatDateTimeFiltersParameters } from '../utilities.js';
-describe('node-green-button-subscriber/helpers', () => {
+describe('node-green-button-subscriber/utilities', () => {
     it('Formats Dates and ISO strings properly', () => {
         const isoDate = '2023-01-02T12:34:56Z';
         const dateTimeFilters = {
