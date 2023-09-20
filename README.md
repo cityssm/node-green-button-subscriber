@@ -36,8 +36,13 @@ npm install @cityssm/green-button-subscriber
 ```javascript
 import { GreenButtonSubscriber } from '@cityssm/green-button-subscriber'
 
+const configuration = {
+  baseUrl: 'https://greenbutton.example.com/',
+  accessToken: '0123456789abcdef'
+}
+
 // Pass the base URL, client ID, client secret, etc.
-const greenButtonSubscriber = new GreenButtonSubscriber(config)
+const greenButtonSubscriber = new GreenButtonSubscriber(configuration)
 
 // Get the authorizations
 const greenButtonJson = await greenButtonSubscriber.getAuthorizations()
