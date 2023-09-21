@@ -13,6 +13,7 @@ export class GreenButtonSubscriber {
     }
     setConfiguration(configuration) {
         this._configuration = configuration;
+        this._token = undefined;
     }
     setUtilityApiConfiguration(apiToken, baseUrl = 'https://utilityapi.com/') {
         this.setConfiguration({
@@ -43,7 +44,7 @@ export class GreenButtonSubscriber {
             });
             this._token = response.data;
             debug('Access token obtained successfully.');
-            debug('Access Token:', this._token.access_token);
+            debug('Access Token:', this._token?.access_token);
         }
         catch (error) {
             debug('Error getting access token:', error.response.data);
@@ -56,7 +57,7 @@ export class GreenButtonSubscriber {
             await this.getAccessToken();
         }
         const headers = {
-            Authorization: `Bearer ${this._token.access_token}`
+            Authorization: `Bearer ${this._token?.access_token ?? ''}`
         };
         const apiEndpoint = this._configuration.baseUrl + endpoint;
         debug(`End Point: ${apiEndpoint}`);
@@ -68,7 +69,10 @@ export class GreenButtonSubscriber {
         }
         try {
             const response = await axios.get(apiEndpoint, requestOptions);
-            return response.data;
+            return {
+                data: response.data,
+                status: response.status
+            };
         }
         catch (error) {
             debug('Error accessing API endpoint:', error.response.data);
@@ -76,11 +80,18 @@ export class GreenButtonSubscriber {
         return undefined;
     }
     async getGreenButtonEndpoint(greenButtonEndpoint, getParameters) {
-        const greenButtonXml = await this.getEndpoint(`DataCustodian/espi/1_1/resource${greenButtonEndpoint}`, getParameters);
-        if (greenButtonXml === undefined) {
+        const endpointResponse = await this.getEndpoint(`DataCustodian/espi/1_1/resource${greenButtonEndpoint}`, getParameters);
+        if (endpointResponse === undefined) {
             return undefined;
         }
-        return await atomToGreenButtonJson(greenButtonXml);
+        let json;
+        if ((endpointResponse.data ?? '') !== '') {
+            json = await atomToGreenButtonJson(endpointResponse.data);
+        }
+        return {
+            status: endpointResponse.status,
+            json
+        };
     }
     async getAuthorizations() {
         return await this.getGreenButtonEndpoint('/Authorization');

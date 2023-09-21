@@ -2,6 +2,7 @@ import assert from 'node:assert'
 import fs from 'node:fs'
 
 import { helpers as greenButtonHelpers } from '@cityssm/green-button-parser'
+import type { GreenButtonJson } from '@cityssm/green-button-parser/types/entryTypes.js'
 
 import { GreenButtonSubscriber } from '../index.js'
 
@@ -28,7 +29,7 @@ describe('node-green-button-subscriber', () => {
       assert.ok(response !== undefined)
 
       const entries = greenButtonHelpers.getEntriesByContentType(
-        response,
+        response.json as GreenButtonJson,
         'Authorization'
       )
 
@@ -50,7 +51,7 @@ describe('node-green-button-subscriber', () => {
       assert.ok(response !== undefined)
 
       const entries = greenButtonHelpers.getEntriesByContentType(
-        response,
+        response.json as GreenButtonJson,
         'Authorization'
       )
       assert.ok(entries.length > 0)
@@ -69,7 +70,7 @@ describe('node-green-button-subscriber', () => {
       assert.ok(response !== undefined)
 
       const entries = greenButtonHelpers.getEntriesByContentType(
-        response,
+        response.json as GreenButtonJson,
         'UsagePoint'
       )
       assert.ok(entries.length > 0)
@@ -89,7 +90,7 @@ describe('node-green-button-subscriber', () => {
       assert.ok(response !== undefined)
 
       const entries = greenButtonHelpers.getEntriesByContentType(
-        response,
+        response.json as GreenButtonJson,
         'MeterReading'
       )
       assert.ok(entries.length > 0)
@@ -109,7 +110,7 @@ describe('node-green-button-subscriber', () => {
       assert.ok(response !== undefined)
 
       const entries = greenButtonHelpers.getEntriesByContentType(
-        response,
+        response.json as GreenButtonJson,
         'UsageSummary'
       )
       assert.ok(entries.length > 0)
@@ -131,7 +132,7 @@ describe('node-green-button-subscriber', () => {
 
       /*
       const entries = greenButtonHelpers.getEntriesByContentType(
-        response,
+        response.json as GreenButtonJson,
         'ElectricPowerQualitySummary'
       )
       assert.ok(entries.length > 0)
@@ -153,7 +154,7 @@ describe('node-green-button-subscriber', () => {
       assert.ok(response !== undefined)
 
       const entries = greenButtonHelpers.getEntriesByContentType(
-        response,
+        response.json as GreenButtonJson,
         'IntervalBlock'
       )
       assert.ok(entries.length > 0)
@@ -170,7 +171,7 @@ describe('node-green-button-subscriber', () => {
       assert.ok(response !== undefined)
 
       const entries = greenButtonHelpers.getEntriesByContentType(
-        response,
+        response.json as GreenButtonJson,
         'Customer'
       )
       assert.ok(entries.length > 0)
@@ -190,7 +191,7 @@ describe('node-green-button-subscriber', () => {
       assert.ok(response !== undefined)
 
       const entries = greenButtonHelpers.getEntriesByContentType(
-        response,
+        response.json as GreenButtonJson,
         'CustomerAccount'
       )
       assert.ok(entries.length > 0)
@@ -211,7 +212,7 @@ describe('node-green-button-subscriber', () => {
       assert.ok(response !== undefined)
 
       const entries = greenButtonHelpers.getEntriesByContentType(
-        response,
+        response.json as GreenButtonJson,
         'CustomerAgreement'
       )
       assert.ok(entries.length > 0)
@@ -239,7 +240,7 @@ describe('node-green-button-subscriber', () => {
       )
 
       const entries = greenButtonHelpers.getEntriesByContentType(
-        response,
+        response.json as GreenButtonJson,
         'IntervalBlock'
       )
       assert.ok(entries.length > 0)
@@ -259,7 +260,7 @@ describe('node-green-button-subscriber', () => {
       assert.ok(response !== undefined)
 
       const entries = greenButtonHelpers.getEntriesByContentType(
-        response,
+        response.json as GreenButtonJson,
         'IntervalBlock'
       )
       assert.ok(entries.length > 0)

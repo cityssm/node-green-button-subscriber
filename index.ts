@@ -1,14 +1,12 @@
 // eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable @typescript-eslint/indent */
 
-import {
-  atomToGreenButtonJson,
-  type types as greenButtonTypes
-} from '@cityssm/green-button-parser'
+import { atomToGreenButtonJson } from '@cityssm/green-button-parser'
+import type { GreenButtonJson } from '@cityssm/green-button-parser/types/entryTypes.js'
 import axios, { type AxiosRequestConfig } from 'axios'
 import Debug from 'debug'
 
-import type { DateTimeFilters } from './types.js'
+import type { DateTimeFilters, GreenButtonResponse } from './types.js'
 import { formatDateTimeFiltersParameters } from './utilities.js'
 
 const debug = Debug('green-button-subscriber')
@@ -20,12 +18,19 @@ export interface GreenButtonSubscriberConfiguration {
   accessToken?: string
 }
 
+interface GetEndpointResponse {
+  data: string
+  status: number
+}
+
 export class GreenButtonSubscriber {
   _configuration: GreenButtonSubscriberConfiguration
-  _token: {
-    access_token: string
-    expires_in: number
-  }
+  _token:
+    | {
+        access_token: string
+        expires_in: number
+      }
+    | undefined
 
   constructor(configuration?: GreenButtonSubscriberConfiguration) {
     if (configuration !== undefined) {
@@ -35,6 +40,7 @@ export class GreenButtonSubscriber {
 
   setConfiguration(configuration: GreenButtonSubscriberConfiguration): void {
     this._configuration = configuration
+    this._token = undefined
   }
 
   setUtilityApiConfiguration(
@@ -79,7 +85,7 @@ export class GreenButtonSubscriber {
       this._token = response.data
 
       debug('Access token obtained successfully.')
-      debug('Access Token:', this._token.access_token)
+      debug('Access Token:', this._token?.access_token)
     } catch (error) {
       debug('Error getting access token:', error.response.data)
     }
@@ -88,7 +94,7 @@ export class GreenButtonSubscriber {
   async getEndpoint(
     endpoint: string,
     getParameters: Record<string, string> = {}
-  ): Promise<string | undefined> {
+  ): Promise<GetEndpointResponse | undefined> {
     if (
       this._token === undefined ||
       Date.now() >= this._token.expires_in * 1000
@@ -100,7 +106,7 @@ export class GreenButtonSubscriber {
 
     // Set the access token in the request headers
     const headers = {
-      Authorization: `Bearer ${this._token.access_token}`
+      Authorization: `Bearer ${this._token?.access_token ?? ''}`
     }
 
     const apiEndpoint = this._configuration.baseUrl + endpoint
@@ -116,7 +122,10 @@ export class GreenButtonSubscriber {
 
     try {
       const response = await axios.get(apiEndpoint, requestOptions)
-      return response.data
+      return {
+        data: response.data,
+        status: response.status
+      }
     } catch (error) {
       debug('Error accessing API endpoint:', error.response.data)
     }
@@ -127,37 +136,44 @@ export class GreenButtonSubscriber {
   async getGreenButtonEndpoint(
     greenButtonEndpoint: `/${string}`,
     getParameters?: Record<string, string>
-  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
-    const greenButtonXml = await this.getEndpoint(
+  ): Promise<GreenButtonResponse | undefined> {
+    const endpointResponse = await this.getEndpoint(
       `DataCustodian/espi/1_1/resource${greenButtonEndpoint}`,
       getParameters
     )
 
-    if (greenButtonXml === undefined) {
+    if (endpointResponse === undefined) {
       return undefined
     }
 
-    return await atomToGreenButtonJson(greenButtonXml)
+    let json: GreenButtonJson | undefined
+
+    if ((endpointResponse.data ?? '') !== '') {
+      json = await atomToGreenButtonJson(endpointResponse.data)
+    }
+
+    return {
+      status: endpointResponse.status,
+      json
+    }
   }
 
   /**
    * Get a list of Authorizations from customers.
-   * @returns GreenButtonJson with Authorization content entries.
+   * @returns GreenButtonResponse with Authorization content entries.
    */
-  async getAuthorizations(): Promise<
-    greenButtonTypes.GreenButtonJson | undefined
-  > {
+  async getAuthorizations(): Promise<GreenButtonResponse | undefined> {
     return await this.getGreenButtonEndpoint('/Authorization')
   }
 
   /**
    * Get a specific customer authorization.
    * @param authorizationId
-   * @returns GreenButtonJson with Authorization content entries.
+   * @returns GreenButtonResponse with Authorization content entries.
    */
   async getAuthorization(
     authorizationId: string
-  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+  ): Promise<GreenButtonResponse | undefined> {
     return await this.getGreenButtonEndpoint(
       `/Authorization/${authorizationId}`
     )
@@ -166,11 +182,11 @@ export class GreenButtonSubscriber {
   /**
    * Get a list of Usage Points.
    * @param authorizationId
-   * @returns GreenButtonJson with UsagePoint content entries.
+   * @returns GreenButtonResponse with UsagePoint content entries.
    */
   async getUsagePoints(
     authorizationId: string
-  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+  ): Promise<GreenButtonResponse | undefined> {
     return await this.getGreenButtonEndpoint(
       `/Subscription/${authorizationId}/UsagePoint`
     )
@@ -180,12 +196,12 @@ export class GreenButtonSubscriber {
    * Get a list of Meter Readings.
    * @param authorizationId
    * @param meterId
-   * @returns GreenButtonJson with MeterReading content entries.
+   * @returns GreenButtonResponse with MeterReading content entries.
    */
   async getMeterReadings(
     authorizationId: string,
     meterId: string
-  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+  ): Promise<GreenButtonResponse | undefined> {
     return await this.getGreenButtonEndpoint(
       `/Subscription/${authorizationId}/UsagePoint/${meterId}/MeterReading`
     )
@@ -194,13 +210,13 @@ export class GreenButtonSubscriber {
   /**
    * Get a list of Interval Blocks.
    * @param authorizationId
-   * @returns GreenButtonJson with MeterReading content entries.
+   * @returns GreenButtonResponse with MeterReading content entries.
    */
   async getIntervalBlocks(
     authorizationId: string,
     meterId: string,
     readingId: string
-  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+  ): Promise<GreenButtonResponse | undefined> {
     return await this.getGreenButtonEndpoint(
       `/Subscription/${authorizationId}/UsagePoint/${meterId}/MeterReading/${readingId}/IntervalBlock`
     )
@@ -210,12 +226,12 @@ export class GreenButtonSubscriber {
    * Get a list of Usage Summaries.
    * @param authorizationId
    * @param meterId
-   * @returns GreenButtonJson with UsageSummary content entries.
+   * @returns GreenButtonResponse with UsageSummary content entries.
    */
   async getUsageSummaries(
     authorizationId: string,
     meterId: string
-  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+  ): Promise<GreenButtonResponse | undefined> {
     return await this.getGreenButtonEndpoint(
       `/Subscription/${authorizationId}/UsagePoint/${meterId}/UsageSummary`
     )
@@ -225,12 +241,12 @@ export class GreenButtonSubscriber {
    * Get a list of Electric Power Quaility Summaries.
    * @param authorizationId
    * @param meterId
-   * @returns GreenButtonJson with ElectricPowerQualitySummary content entries.
+   * @returns GreenButtonResponse with ElectricPowerQualitySummary content entries.
    */
   async getElectricPowerQualitySummaries(
     authorizationId: string,
     meterId: string
-  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+  ): Promise<GreenButtonResponse | undefined> {
     return await this.getGreenButtonEndpoint(
       `/Subscription/${authorizationId}/UsagePoint/${meterId}/ElectricPowerQualitySummary`
     )
@@ -238,7 +254,7 @@ export class GreenButtonSubscriber {
 
   async getCustomers(
     authorizationId: string
-  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+  ): Promise<GreenButtonResponse | undefined> {
     return await this.getGreenButtonEndpoint(
       `/RetailCustomer/${authorizationId}/Customer`
     )
@@ -247,7 +263,7 @@ export class GreenButtonSubscriber {
   async getCustomerAccounts(
     authorizationId: string,
     customerId: string
-  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+  ): Promise<GreenButtonResponse | undefined> {
     return await this.getGreenButtonEndpoint(
       `/RetailCustomer/${authorizationId}/Customer/${customerId}/CustomerAccount`
     )
@@ -257,7 +273,7 @@ export class GreenButtonSubscriber {
     authorizationId: string,
     customerId: string,
     customerAccountId: string
-  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+  ): Promise<GreenButtonResponse | undefined> {
     return await this.getGreenButtonEndpoint(
       `/RetailCustomer/${authorizationId}/Customer/${customerId}/CustomerAccount/${customerAccountId}/CustomerAgreement`
     )
@@ -272,7 +288,7 @@ export class GreenButtonSubscriber {
   async getBatchSubscriptionsByAuthorization(
     authorizationId: string,
     dateTimeFilters?: DateTimeFilters
-  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+  ): Promise<GreenButtonResponse | undefined> {
     return await this.getGreenButtonEndpoint(
       `/Batch/Subscription/${authorizationId}`,
       formatDateTimeFiltersParameters(dateTimeFilters)
@@ -290,7 +306,7 @@ export class GreenButtonSubscriber {
     authorizationId: string,
     meterId: string,
     dateTimeFilters?: DateTimeFilters
-  ): Promise<greenButtonTypes.GreenButtonJson | undefined> {
+  ): Promise<GreenButtonResponse | undefined> {
     return await this.getGreenButtonEndpoint(
       `/Batch/Subscription/${authorizationId}/UsagePoint/${meterId}`,
       formatDateTimeFiltersParameters(dateTimeFilters)

@@ -8,6 +8,7 @@
   "description": "Handles the OAuth authentication, downloading, and parsing of Green Button® data.",
   "keywords": [
     "connect-my-data",
+    "download-my-data",
     "energy",
     "energy-consumption",
     "energy-usage",
@@ -15,6 +16,7 @@
     "green-button",
     "openespi",
     "open-energy-services-provider-interface",
+    "third-party",
     "utilityapi",
     "xml-parser"
   ],
@@ -38,7 +40,7 @@
     "url": "https://github.com/cityssm/node-green-button-subscriber/issues"
   },
   "dependencies": {
-    "@cityssm/green-button-parser": "^0.6.1",
+    "@cityssm/green-button-parser": "^0.7.0",
     "axios": "^1.5.0",
     "debug": "^4.3.4"
   },

@@ -12,7 +12,7 @@ describe('node-green-button-subscriber', () => {
         try {
             const response = await greenButtonSubscriber.getAuthorizations();
             assert.ok(response !== undefined);
-            const entries = greenButtonHelpers.getEntriesByContentType(response, 'Authorization');
+            const entries = greenButtonHelpers.getEntriesByContentType(response.json, 'Authorization');
             console.log(JSON.stringify(entries, undefined, 2));
             assert.ok(entries.length > 0);
         }
@@ -25,7 +25,7 @@ describe('node-green-button-subscriber', () => {
         try {
             const response = await greenButtonSubscriber.getAuthorization(authorizationId);
             assert.ok(response !== undefined);
-            const entries = greenButtonHelpers.getEntriesByContentType(response, 'Authorization');
+            const entries = greenButtonHelpers.getEntriesByContentType(response.json, 'Authorization');
             assert.ok(entries.length > 0);
         }
         catch (error) {
@@ -37,7 +37,7 @@ describe('node-green-button-subscriber', () => {
         try {
             const response = await greenButtonSubscriber.getUsagePoints(authorizationId);
             assert.ok(response !== undefined);
-            const entries = greenButtonHelpers.getEntriesByContentType(response, 'UsagePoint');
+            const entries = greenButtonHelpers.getEntriesByContentType(response.json, 'UsagePoint');
             assert.ok(entries.length > 0);
         }
         catch (error) {
@@ -49,7 +49,7 @@ describe('node-green-button-subscriber', () => {
         try {
             const response = await greenButtonSubscriber.getMeterReadings(authorizationId, meterId);
             assert.ok(response !== undefined);
-            const entries = greenButtonHelpers.getEntriesByContentType(response, 'MeterReading');
+            const entries = greenButtonHelpers.getEntriesByContentType(response.json, 'MeterReading');
             assert.ok(entries.length > 0);
         }
         catch (error) {
@@ -61,7 +61,7 @@ describe('node-green-button-subscriber', () => {
         try {
             const response = await greenButtonSubscriber.getUsageSummaries(authorizationId, meterId);
             assert.ok(response !== undefined);
-            const entries = greenButtonHelpers.getEntriesByContentType(response, 'UsageSummary');
+            const entries = greenButtonHelpers.getEntriesByContentType(response.json, 'UsageSummary');
             assert.ok(entries.length > 0);
         }
         catch (error) {
@@ -83,7 +83,7 @@ describe('node-green-button-subscriber', () => {
         try {
             const response = await greenButtonSubscriber.getIntervalBlocks(authorizationId, meterId, readingId);
             assert.ok(response !== undefined);
-            const entries = greenButtonHelpers.getEntriesByContentType(response, 'IntervalBlock');
+            const entries = greenButtonHelpers.getEntriesByContentType(response.json, 'IntervalBlock');
             assert.ok(entries.length > 0);
         }
         catch (error) {
@@ -95,7 +95,7 @@ describe('node-green-button-subscriber', () => {
         try {
             const response = await greenButtonSubscriber.getCustomers(authorizationId);
             assert.ok(response !== undefined);
-            const entries = greenButtonHelpers.getEntriesByContentType(response, 'Customer');
+            const entries = greenButtonHelpers.getEntriesByContentType(response.json, 'Customer');
             assert.ok(entries.length > 0);
         }
         catch (error) {
@@ -107,7 +107,7 @@ describe('node-green-button-subscriber', () => {
         try {
             const response = await greenButtonSubscriber.getCustomerAccounts(authorizationId, customerId);
             assert.ok(response !== undefined);
-            const entries = greenButtonHelpers.getEntriesByContentType(response, 'CustomerAccount');
+            const entries = greenButtonHelpers.getEntriesByContentType(response.json, 'CustomerAccount');
             assert.ok(entries.length > 0);
         }
         catch (error) {
@@ -119,7 +119,7 @@ describe('node-green-button-subscriber', () => {
         try {
             const response = await greenButtonSubscriber.getCustomerAgreements(authorizationId, customerId, customerAccountId);
             assert.ok(response !== undefined);
-            const entries = greenButtonHelpers.getEntriesByContentType(response, 'CustomerAgreement');
+            const entries = greenButtonHelpers.getEntriesByContentType(response.json, 'CustomerAgreement');
             assert.ok(entries.length > 0);
         }
         catch (error) {
@@ -134,7 +134,7 @@ describe('node-green-button-subscriber', () => {
             });
             assert.ok(response !== undefined);
             fs.writeFileSync('test/_output/batchSubscription.json', JSON.stringify(response, undefined, 2));
-            const entries = greenButtonHelpers.getEntriesByContentType(response, 'IntervalBlock');
+            const entries = greenButtonHelpers.getEntriesByContentType(response.json, 'IntervalBlock');
             assert.ok(entries.length > 0);
         }
         catch (error) {
@@ -146,7 +146,7 @@ describe('node-green-button-subscriber', () => {
         try {
             const response = await greenButtonSubscriber.getBatchSubscriptionsByMeter(authorizationId, meterId);
             assert.ok(response !== undefined);
-            const entries = greenButtonHelpers.getEntriesByContentType(response, 'IntervalBlock');
+            const entries = greenButtonHelpers.getEntriesByContentType(response.json, 'IntervalBlock');
             assert.ok(entries.length > 0);
         }
         catch (error) {

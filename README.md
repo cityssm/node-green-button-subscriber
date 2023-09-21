@@ -19,10 +19,6 @@ and the need to be a customer with the utility company to access data,
 this module is currently only tested with
 [UtilityAPI's Green Button® CMD implementation](https://utilityapi.com/docs/greenbutton)._
 
-If you are looking to parse Green Button® XML data downloaded from a utility provider
-using the [Green Button Download My Data® (DMD) standard](https://www.greenbuttonalliance.org/green-button-download-my-data-dmd), see the
-[City of Sault Ste. Marie's Green Button® Parser](https://github.com/cityssm/node-green-button-parser).
-
 ## Installation
 
 ```bash
@@ -45,8 +41,17 @@ const configuration = {
 const greenButtonSubscriber = new GreenButtonSubscriber(configuration)
 
 // Get the authorizations
-const greenButtonJson = await greenButtonSubscriber.getAuthorizations()
+const greenButtonResponse = await greenButtonSubscriber.getAuthorizations()
 ```
+
+## Related Projects
+
+If you are looking to parse Green Button® XML data downloaded from a utility provider
+using the [Green Button Download My Data® (DMD) standard](https://www.greenbuttonalliance.org/green-button-download-my-data-dmd), see the
+[City of Sault Ste. Marie's Green Button® Parser](https://github.com/cityssm/node-green-button-parser).
+
+If you are looking for a full application to report on energy usage,
+see [EMILE (Energy Monitoring in Less Effort)](https://github.com/cityssm/EMILE).
 
 ## Trademarks
 
