@@ -154,4 +154,26 @@ describe('node-green-button-subscriber', () => {
             assert.fail();
         }
     });
+    it('Follows related links', async () => {
+        try {
+            const response = await greenButtonSubscriber.getCustomers(authorizationId);
+            assert.ok(response !== undefined);
+            const entries = greenButtonHelpers.getEntriesByContentType(response.json, 'Customer');
+            assert.ok(entries.length > 0);
+            let linksTested = false;
+            for (const entry of entries) {
+                for (const relatedLink of entry.links.related ?? []) {
+                    linksTested = true;
+                    const relatedResponse = await greenButtonSubscriber.getGreenButtonHttpsLink(relatedLink);
+                    assert.ok(relatedResponse !== undefined);
+                    console.log(JSON.stringify(relatedResponse, undefined, 2));
+                }
+            }
+            assert.ok(linksTested);
+        }
+        catch (error) {
+            console.error(error);
+            assert.fail();
+        }
+    });
 });

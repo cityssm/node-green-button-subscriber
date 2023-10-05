@@ -4,16 +4,16 @@ import Debug from 'debug';
 import { formatDateTimeFiltersParameters } from './utilities.js';
 const debug = Debug('green-button-subscriber');
 export class GreenButtonSubscriber {
-    _configuration;
-    _token;
+    #configuration;
+    #token;
     constructor(configuration) {
         if (configuration !== undefined) {
             this.setConfiguration(configuration);
         }
     }
     setConfiguration(configuration) {
-        this._configuration = configuration;
-        this._token = undefined;
+        this.#configuration = configuration;
+        this.#token = undefined;
     }
     setUtilityApiConfiguration(apiToken, baseUrl = 'https://utilityapi.com/') {
         this.setConfiguration({
@@ -21,45 +21,44 @@ export class GreenButtonSubscriber {
             accessToken: apiToken
         });
     }
-    async getAccessToken() {
-        if (this._configuration.accessToken !== undefined) {
-            this._token = {
-                access_token: this._configuration.accessToken,
+    async #getAccessToken() {
+        if (this.#configuration.accessToken !== undefined) {
+            this.#token = {
+                access_token: this.#configuration.accessToken,
                 expires_in: Number.POSITIVE_INFINITY
             };
             return;
         }
         try {
-            const authorizeUrl = `${this._configuration.baseUrl}oauth/authorize`;
+            const authorizeUrl = `${this.#configuration.baseUrl}oauth/authorize`;
             debug(`Authorize URL: ${authorizeUrl}`);
             const response = await axios.post(authorizeUrl, {
                 response_type: 'code',
                 grant_type: 'client_credentials',
-                client_id: this._configuration.clientId,
-                client_secret: this._configuration.clientSecret
+                client_id: this.#configuration.clientId,
+                client_secret: this.#configuration.clientSecret
             }, {
                 headers: {
-                    Referer: this._configuration.baseUrl
+                    Referer: this.#configuration.baseUrl
                 }
             });
-            this._token = response.data;
+            this.#token = response.data;
             debug('Access token obtained successfully.');
-            debug('Access Token:', this._token?.access_token);
+            debug('Access Token:', this.#token?.access_token);
         }
         catch (error) {
             debug('Error getting access token:', error.response.data);
         }
     }
-    async getEndpoint(endpoint, getParameters = {}) {
-        if (this._token === undefined ||
-            Date.now() >= this._token.expires_in * 1000) {
+    async #getEndpoint(apiEndpoint, getParameters = {}) {
+        if (this.#token === undefined ||
+            Date.now() >= this.#token.expires_in * 1000) {
             debug('Token expired.');
-            await this.getAccessToken();
+            await this.#getAccessToken();
         }
         const headers = {
-            Authorization: `Bearer ${this._token?.access_token ?? ''}`
+            Authorization: `Bearer ${this.#token?.access_token ?? ''}`
         };
-        const apiEndpoint = this._configuration.baseUrl + endpoint;
         debug(`End Point: ${apiEndpoint}`);
         const requestOptions = {
             headers
@@ -79,8 +78,8 @@ export class GreenButtonSubscriber {
         }
         return undefined;
     }
-    async getGreenButtonEndpoint(greenButtonEndpoint, getParameters) {
-        const endpointResponse = await this.getEndpoint(`DataCustodian/espi/1_1/resource${greenButtonEndpoint}`, getParameters);
+    async getGreenButtonHttpsLink(greenButtonHttpsLink, getParameters) {
+        const endpointResponse = await this.#getEndpoint(greenButtonHttpsLink, getParameters);
         if (endpointResponse === undefined) {
             return undefined;
         }
@@ -92,6 +91,9 @@ export class GreenButtonSubscriber {
             status: endpointResponse.status,
             json
         };
+    }
+    async getGreenButtonEndpoint(greenButtonEndpoint, getParameters) {
+        return await this.getGreenButtonHttpsLink(`${this.#configuration.baseUrl}DataCustodian/espi/1_1/resource${greenButtonEndpoint}`, getParameters);
     }
     async getAuthorizations() {
         return await this.getGreenButtonEndpoint('/Authorization');

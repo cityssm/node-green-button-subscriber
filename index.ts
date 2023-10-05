@@ -24,8 +24,8 @@ interface GetEndpointResponse {
 }
 
 export class GreenButtonSubscriber {
-  _configuration: GreenButtonSubscriberConfiguration
-  _token:
+  #configuration: GreenButtonSubscriberConfiguration
+  #token:
     | {
         access_token: string
         expires_in: number
@@ -39,8 +39,8 @@ export class GreenButtonSubscriber {
   }
 
   setConfiguration(configuration: GreenButtonSubscriberConfiguration): void {
-    this._configuration = configuration
-    this._token = undefined
+    this.#configuration = configuration
+    this.#token = undefined
   }
 
   setUtilityApiConfiguration(
@@ -53,17 +53,17 @@ export class GreenButtonSubscriber {
     })
   }
 
-  async getAccessToken(): Promise<void> {
-    if (this._configuration.accessToken !== undefined) {
-      this._token = {
-        access_token: this._configuration.accessToken,
+  async #getAccessToken(): Promise<void> {
+    if (this.#configuration.accessToken !== undefined) {
+      this.#token = {
+        access_token: this.#configuration.accessToken,
         expires_in: Number.POSITIVE_INFINITY
       }
       return
     }
 
     try {
-      const authorizeUrl = `${this._configuration.baseUrl}oauth/authorize`
+      const authorizeUrl = `${this.#configuration.baseUrl}oauth/authorize`
 
       debug(`Authorize URL: ${authorizeUrl}`)
 
@@ -72,44 +72,43 @@ export class GreenButtonSubscriber {
         {
           response_type: 'code',
           grant_type: 'client_credentials',
-          client_id: this._configuration.clientId,
-          client_secret: this._configuration.clientSecret
+          client_id: this.#configuration.clientId,
+          client_secret: this.#configuration.clientSecret
         },
         {
           headers: {
-            Referer: this._configuration.baseUrl
+            Referer: this.#configuration.baseUrl
           }
         }
       )
 
-      this._token = response.data
+      this.#token = response.data
 
       debug('Access token obtained successfully.')
-      debug('Access Token:', this._token?.access_token)
+      debug('Access Token:', this.#token?.access_token)
     } catch (error) {
       debug('Error getting access token:', error.response.data)
     }
   }
 
-  async getEndpoint(
-    endpoint: string,
+  async #getEndpoint(
+    apiEndpoint: string,
     getParameters: Record<string, string> = {}
   ): Promise<GetEndpointResponse | undefined> {
     if (
-      this._token === undefined ||
-      Date.now() >= this._token.expires_in * 1000
+      this.#token === undefined ||
+      Date.now() >= this.#token.expires_in * 1000
     ) {
       // If the token is not obtained or has expired, get a new one
       debug('Token expired.')
-      await this.getAccessToken()
+      await this.#getAccessToken()
     }
 
     // Set the access token in the request headers
     const headers = {
-      Authorization: `Bearer ${this._token?.access_token ?? ''}`
+      Authorization: `Bearer ${this.#token?.access_token ?? ''}`
     }
 
-    const apiEndpoint = this._configuration.baseUrl + endpoint
     debug(`End Point: ${apiEndpoint}`)
 
     const requestOptions: AxiosRequestConfig = {
@@ -133,12 +132,19 @@ export class GreenButtonSubscriber {
     return undefined
   }
 
-  async getGreenButtonEndpoint(
-    greenButtonEndpoint: `/${string}`,
+  /**
+   * Retrieves and parses the data from a full Green Button URL.
+   * Helpful when following related links returned by previous API calls.
+   * @param greenButtonHttpsLink ex. "https://example.com/DataCustodian/espi/1_1/resource/..."
+   * @param getParameters
+   * @returns
+   */
+  async getGreenButtonHttpsLink(
+    greenButtonHttpsLink: string,
     getParameters?: Record<string, string>
   ): Promise<GreenButtonResponse | undefined> {
-    const endpointResponse = await this.getEndpoint(
-      `DataCustodian/espi/1_1/resource${greenButtonEndpoint}`,
+    const endpointResponse = await this.#getEndpoint(
+      greenButtonHttpsLink,
       getParameters
     )
 
@@ -156,6 +162,24 @@ export class GreenButtonSubscriber {
       status: endpointResponse.status,
       json
     }
+  }
+
+  /**
+   * Retrieves and parses the data from a Green Button endpoint.
+   * @param greenButtonEndpoint ex. "/Authorization", "/Batch/Subscription/xxxxxx"
+   * @param getParameters
+   * @returns
+   */
+  async getGreenButtonEndpoint(
+    greenButtonEndpoint: `/${string}`,
+    getParameters?: Record<string, string>
+  ): Promise<GreenButtonResponse | undefined> {
+    return await this.getGreenButtonHttpsLink(
+      `${
+        this.#configuration.baseUrl
+      }DataCustodian/espi/1_1/resource${greenButtonEndpoint}`,
+      getParameters
+    )
   }
 
   /**
@@ -238,7 +262,7 @@ export class GreenButtonSubscriber {
   }
 
   /**
-   * Get a list of Electric Power Quaility Summaries.
+   * Get a list of Electric Power Quality Summaries.
    * @param authorizationId
    * @param meterId
    * @returns GreenButtonResponse with ElectricPowerQualitySummary content entries.

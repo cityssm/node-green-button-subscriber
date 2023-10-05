@@ -5,21 +5,12 @@ export interface GreenButtonSubscriberConfiguration {
     clientSecret?: string;
     accessToken?: string;
 }
-interface GetEndpointResponse {
-    data: string;
-    status: number;
-}
 export declare class GreenButtonSubscriber {
-    _configuration: GreenButtonSubscriberConfiguration;
-    _token: {
-        access_token: string;
-        expires_in: number;
-    } | undefined;
+    #private;
     constructor(configuration?: GreenButtonSubscriberConfiguration);
     setConfiguration(configuration: GreenButtonSubscriberConfiguration): void;
     setUtilityApiConfiguration(apiToken: string, baseUrl?: `${string}/`): void;
-    getAccessToken(): Promise<void>;
-    getEndpoint(endpoint: string, getParameters?: Record<string, string>): Promise<GetEndpointResponse | undefined>;
+    getGreenButtonHttpsLink(greenButtonHttpsLink: string, getParameters?: Record<string, string>): Promise<GreenButtonResponse | undefined>;
     getGreenButtonEndpoint(greenButtonEndpoint: `/${string}`, getParameters?: Record<string, string>): Promise<GreenButtonResponse | undefined>;
     getAuthorizations(): Promise<GreenButtonResponse | undefined>;
     getAuthorization(authorizationId: string): Promise<GreenButtonResponse | undefined>;
