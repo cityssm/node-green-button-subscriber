@@ -40,7 +40,7 @@
     "url": "https://github.com/cityssm/node-green-button-subscriber/issues"
   },
   "dependencies": {
-    "@cityssm/green-button-parser": "^0.7.0",
+    "@cityssm/green-button-parser": "^0.8.0",
     "axios": "^1.5.1",
     "debug": "^4.3.4"
   },
