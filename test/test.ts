@@ -7,8 +7,9 @@ import type { GreenButtonJson } from '@cityssm/green-button-parser/types/entryTy
 import { GreenButtonSubscriber } from '../index.js'
 
 import {
+  appId,
   authorizationId,
-  config,
+  configEnbridge as config,
   customerAccountId,
   customerId,
   meterId,
@@ -20,6 +21,50 @@ describe('node-green-button-subscriber', () => {
 
   before(() => {
     greenButtonSubscriber = new GreenButtonSubscriber(config)
+  })
+
+  it('Retrieves service status', async () => {
+    try {
+      const response = await greenButtonSubscriber.getServiceStatus()
+
+      assert.ok(response !== undefined)
+
+      console.log(response)
+
+      const entries = greenButtonHelpers.getEntriesByContentType(
+        response.json as GreenButtonJson,
+        'ServiceStatus'
+      )
+
+      console.log(JSON.stringify(entries, undefined, 2))
+
+      assert.ok(entries.length > 0)
+    } catch (error) {
+      console.error(error)
+      assert.fail()
+    }
+  })
+
+  it('Retrieves application information', async () => {
+    try {
+      const response = await greenButtonSubscriber.getApplicationInformation(appId)
+
+      assert.ok(response !== undefined)
+
+      console.log(response)
+
+      const entries = greenButtonHelpers.getEntriesByContentType(
+        response.json as GreenButtonJson,
+        'ApplicationInformation'
+      )
+
+      console.log(JSON.stringify(entries, undefined, 2))
+
+      assert.ok(entries.length > 0)
+    } catch (error) {
+      console.error(error)
+      assert.fail()
+    }
   })
 
   it('Retrieves authorizations', async () => {

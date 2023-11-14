@@ -2,11 +2,39 @@ import assert from 'node:assert';
 import fs from 'node:fs';
 import { helpers as greenButtonHelpers } from '@cityssm/green-button-parser';
 import { GreenButtonSubscriber } from '../index.js';
-import { authorizationId, config, customerAccountId, customerId, meterId, readingId } from './config.js';
+import { appId, authorizationId, configEnbridge as config, customerAccountId, customerId, meterId, readingId } from './config.js';
 describe('node-green-button-subscriber', () => {
     let greenButtonSubscriber;
     before(() => {
         greenButtonSubscriber = new GreenButtonSubscriber(config);
+    });
+    it('Retrieves service status', async () => {
+        try {
+            const response = await greenButtonSubscriber.getServiceStatus();
+            assert.ok(response !== undefined);
+            console.log(response);
+            const entries = greenButtonHelpers.getEntriesByContentType(response.json, 'ServiceStatus');
+            console.log(JSON.stringify(entries, undefined, 2));
+            assert.ok(entries.length > 0);
+        }
+        catch (error) {
+            console.error(error);
+            assert.fail();
+        }
+    });
+    it('Retrieves application information', async () => {
+        try {
+            const response = await greenButtonSubscriber.getApplicationInformation(appId);
+            assert.ok(response !== undefined);
+            console.log(response);
+            const entries = greenButtonHelpers.getEntriesByContentType(response.json, 'ApplicationInformation');
+            console.log(JSON.stringify(entries, undefined, 2));
+            assert.ok(entries.length > 0);
+        }
+        catch (error) {
+            console.error(error);
+            assert.fail();
+        }
     });
     it('Retrieves authorizations', async () => {
         try {

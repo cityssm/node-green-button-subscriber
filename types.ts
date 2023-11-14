@@ -1,7 +1,7 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 /* eslint-disable @typescript-eslint/indent */
 
-import type { GreenButtonJson } from '@cityssm/green-button-parser/types/entryTypes'
+import type { GreenButtonJson } from '@cityssm/green-button-parser/types/entryTypes.js'
 
 export type IsoDateString =
   `${string}-${string}-${string}T${string}:${string}:${string}Z`
@@ -13,6 +13,14 @@ export interface DateTimeFilters {
   publishedMax?: DateOrIsoDateString
   updatedMin?: DateOrIsoDateString
   updatedMax?: DateOrIsoDateString
+}
+
+export interface GreenButtonSubscriberConfiguration {
+  baseUrl: `https://${string}/`
+  oauthUrl?: `https://${string}`
+  clientId?: string
+  clientSecret?: string
+  accessToken?: string
 }
 
 export type GreenButtonResponse =

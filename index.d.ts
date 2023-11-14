@@ -1,15 +1,9 @@
-import type { DateTimeFilters, GreenButtonResponse } from './types.js';
-export interface GreenButtonSubscriberConfiguration {
-    baseUrl: `${string}/`;
-    clientId?: string;
-    clientSecret?: string;
-    accessToken?: string;
-}
+import type { DateTimeFilters, GreenButtonResponse, GreenButtonSubscriberConfiguration } from './types.js';
 export declare class GreenButtonSubscriber {
     #private;
     constructor(configuration?: GreenButtonSubscriberConfiguration);
     setConfiguration(configuration: GreenButtonSubscriberConfiguration): void;
-    setUtilityApiConfiguration(apiToken: string, baseUrl?: `${string}/`): void;
+    setUtilityApiConfiguration(apiToken: string, baseUrl?: `https://${string}/`): void;
     getGreenButtonHttpsLink(greenButtonHttpsLink: string, getParameters?: Record<string, string>): Promise<GreenButtonResponse | undefined>;
     getGreenButtonEndpoint(greenButtonEndpoint: `/${string}`, getParameters?: Record<string, string>): Promise<GreenButtonResponse | undefined>;
     getAuthorizations(): Promise<GreenButtonResponse | undefined>;
@@ -24,6 +18,8 @@ export declare class GreenButtonSubscriber {
     getCustomerAgreements(authorizationId: string, customerId: string, customerAccountId: string): Promise<GreenButtonResponse | undefined>;
     getBatchSubscriptionsByAuthorization(authorizationId: string, dateTimeFilters?: DateTimeFilters): Promise<GreenButtonResponse | undefined>;
     getBatchSubscriptionsByMeter(authorizationId: string, meterId: string, dateTimeFilters?: DateTimeFilters): Promise<GreenButtonResponse | undefined>;
+    getServiceStatus(): Promise<GreenButtonResponse | undefined>;
+    getApplicationInformation(appId: string): Promise<GreenButtonResponse | undefined>;
 }
 export type { types } from '@cityssm/green-button-parser';
 export { helpers } from '@cityssm/green-button-parser';

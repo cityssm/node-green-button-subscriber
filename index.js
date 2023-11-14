@@ -1,6 +1,7 @@
 import { atomToGreenButtonJson } from '@cityssm/green-button-parser';
 import axios from 'axios';
 import Debug from 'debug';
+import { apiConfigurations } from './apiConfigurations.js';
 import { formatDateTimeFiltersParameters } from './utilities.js';
 const debug = Debug('green-button-subscriber');
 export class GreenButtonSubscriber {
@@ -15,7 +16,7 @@ export class GreenButtonSubscriber {
         this.#configuration = configuration;
         this.#token = undefined;
     }
-    setUtilityApiConfiguration(apiToken, baseUrl = 'https://utilityapi.com/') {
+    setUtilityApiConfiguration(apiToken, baseUrl = apiConfigurations.utilityAPI.baseUrl) {
         this.setConfiguration({
             baseUrl,
             accessToken: apiToken
@@ -30,21 +31,19 @@ export class GreenButtonSubscriber {
             return;
         }
         try {
-            const authorizeUrl = `${this.#configuration.baseUrl}oauth/authorize`;
+            const authorizeUrl = this.#configuration.oauthUrl ??
+                `${this.#configuration.baseUrl}oauth/authorize`;
             debug(`Authorize URL: ${authorizeUrl}`);
-            const response = await axios.post(authorizeUrl, {
-                response_type: 'code',
-                grant_type: 'client_credentials',
-                client_id: this.#configuration.clientId,
-                client_secret: this.#configuration.clientSecret
-            }, {
+            const response = await axios.post(authorizeUrl, 'grant_type=client_credentials&scope=FB=36_40', {
                 headers: {
-                    Referer: this.#configuration.baseUrl
+                    Accept: 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    Authorization: `Basic ${Buffer.from(`${this.#configuration.clientId}:${this.#configuration.clientSecret}`).toString('base64')}`
                 }
             });
             this.#token = response.data;
             debug('Access token obtained successfully.');
-            debug('Access Token:', this.#token?.access_token);
+            debug('Access Token:', this.#token);
         }
         catch (error) {
             debug('Error getting access token:', error.response.data);
@@ -93,7 +92,7 @@ export class GreenButtonSubscriber {
         };
     }
     async getGreenButtonEndpoint(greenButtonEndpoint, getParameters) {
-        return await this.getGreenButtonHttpsLink(`${this.#configuration.baseUrl}DataCustodian/espi/1_1/resource${greenButtonEndpoint}`, getParameters);
+        return await this.getGreenButtonHttpsLink(`${this.#configuration.baseUrl}espi/1_1/resource${greenButtonEndpoint}`, getParameters);
     }
     async getAuthorizations() {
         return await this.getGreenButtonEndpoint('/Authorization');
@@ -130,6 +129,12 @@ export class GreenButtonSubscriber {
     }
     async getBatchSubscriptionsByMeter(authorizationId, meterId, dateTimeFilters) {
         return await this.getGreenButtonEndpoint(`/Batch/Subscription/${authorizationId}/UsagePoint/${meterId}`, formatDateTimeFiltersParameters(dateTimeFilters));
+    }
+    async getServiceStatus() {
+        return await this.getGreenButtonEndpoint('/ReadServiceStatus');
+    }
+    async getApplicationInformation(appId) {
+        return await this.getGreenButtonEndpoint(`/ApplicationInformation/${appId}`);
     }
 }
 export { helpers } from '@cityssm/green-button-parser';

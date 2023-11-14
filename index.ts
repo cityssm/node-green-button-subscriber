@@ -6,17 +6,15 @@ import type { GreenButtonJson } from '@cityssm/green-button-parser/types/entryTy
 import axios, { type AxiosRequestConfig } from 'axios'
 import Debug from 'debug'
 
-import type { DateTimeFilters, GreenButtonResponse } from './types.js'
+import { apiConfigurations } from './apiConfigurations.js'
+import type {
+  DateTimeFilters,
+  GreenButtonResponse,
+  GreenButtonSubscriberConfiguration
+} from './types.js'
 import { formatDateTimeFiltersParameters } from './utilities.js'
 
 const debug = Debug('green-button-subscriber')
-
-export interface GreenButtonSubscriberConfiguration {
-  baseUrl: `${string}/`
-  clientId?: string
-  clientSecret?: string
-  accessToken?: string
-}
 
 interface GetEndpointResponse {
   data: string
@@ -29,6 +27,7 @@ export class GreenButtonSubscriber {
     | {
         access_token: string
         expires_in: number
+        refresh_token?: string
       }
     | undefined
 
@@ -45,7 +44,7 @@ export class GreenButtonSubscriber {
 
   setUtilityApiConfiguration(
     apiToken: string,
-    baseUrl: `${string}/` = 'https://utilityapi.com/'
+    baseUrl: `https://${string}/` = apiConfigurations.utilityAPI.baseUrl
   ): void {
     this.setConfiguration({
       baseUrl,
@@ -63,21 +62,24 @@ export class GreenButtonSubscriber {
     }
 
     try {
-      const authorizeUrl = `${this.#configuration.baseUrl}oauth/authorize`
+      const authorizeUrl =
+        this.#configuration.oauthUrl ??
+        `${this.#configuration.baseUrl}oauth/authorize`
 
       debug(`Authorize URL: ${authorizeUrl}`)
 
       const response = await axios.post(
         authorizeUrl,
-        {
-          response_type: 'code',
-          grant_type: 'client_credentials',
-          client_id: this.#configuration.clientId,
-          client_secret: this.#configuration.clientSecret
-        },
+        'grant_type=client_credentials&scope=FB=36_40',
         {
           headers: {
-            Referer: this.#configuration.baseUrl
+            Accept: 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Authorization: `Basic ${Buffer.from(
+              `${this.#configuration.clientId}:${
+                this.#configuration.clientSecret
+              }`
+            ).toString('base64')}`
           }
         }
       )
@@ -85,7 +87,7 @@ export class GreenButtonSubscriber {
       this.#token = response.data
 
       debug('Access token obtained successfully.')
-      debug('Access Token:', this.#token?.access_token)
+      debug('Access Token:', this.#token)
     } catch (error) {
       debug('Error getting access token:', error.response.data)
     }
@@ -175,9 +177,7 @@ export class GreenButtonSubscriber {
     getParameters?: Record<string, string>
   ): Promise<GreenButtonResponse | undefined> {
     return await this.getGreenButtonHttpsLink(
-      `${
-        this.#configuration.baseUrl
-      }DataCustodian/espi/1_1/resource${greenButtonEndpoint}`,
+      `${this.#configuration.baseUrl}espi/1_1/resource${greenButtonEndpoint}`,
       getParameters
     )
   }
@@ -335,6 +335,16 @@ export class GreenButtonSubscriber {
       `/Batch/Subscription/${authorizationId}/UsagePoint/${meterId}`,
       formatDateTimeFiltersParameters(dateTimeFilters)
     )
+  }
+
+  async getServiceStatus(): Promise<GreenButtonResponse | undefined> {
+    return await this.getGreenButtonEndpoint('/ReadServiceStatus')
+  }
+
+  async getApplicationInformation(
+    appId: string
+  ): Promise<GreenButtonResponse | undefined> {
+    return await this.getGreenButtonEndpoint(`/ApplicationInformation/${appId}`)
   }
 }
 

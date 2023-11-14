@@ -3,7 +3,7 @@
   "version": "0.5.0",
   "type": "module",
   "engines": {
-    "node": "^14.13.1 || >=16.0.0"
+    "node": ">=18.0.0"
   },
   "description": "Handles the OAuth authentication, downloading, and parsing of Green Button® data.",
   "keywords": [
@@ -40,16 +40,16 @@
     "url": "https://github.com/cityssm/node-green-button-subscriber/issues"
   },
   "dependencies": {
-    "@cityssm/green-button-parser": "^0.7.0",
-    "axios": "^1.5.1",
+    "@cityssm/green-button-parser": "^1.0.0",
+    "axios": "^1.6.1",
     "debug": "^4.3.4"
   },
   "devDependencies": {
-    "@types/debug": "^4.1.9",
-    "@types/mocha": "^10.0.2",
-    "@types/node": "^20.8.2",
+    "@types/debug": "^4.1.12",
+    "@types/mocha": "^10.0.4",
+    "@types/node": "^20.9.0",
     "cross-env": "^7.0.3",
-    "eslint": "^8.50.0",
-    "eslint-config-cityssm": "^0.4.0"
+    "eslint": "^8.53.0",
+    "eslint-config-cityssm": "^1.0.0"
   }
 }
